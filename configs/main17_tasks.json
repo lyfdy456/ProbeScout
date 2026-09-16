@@ -1,0 +1,266 @@
+{
+  "batch_id": "paper-main17",
+  "task_count": 17,
+  "cohort_manifest": "manifests/paper_main17.json",
+  "tasks": [
+    {
+      "order": 1,
+      "task_id": "001_cars_task_bmw_convertible",
+      "dataset": "cars",
+      "task": "task_bmw_convertible",
+      "joint_label": "BMW convertible",
+      "attributes": [
+        "BMW brand identity",
+        "Convertible body type with soft-top roof"
+      ],
+      "scope": "main17",
+      "stages": [
+        "iterative"
+      ]
+    },
+    {
+      "order": 2,
+      "task_id": "002_cars_task_bmw_sedan",
+      "dataset": "cars",
+      "task": "task_bmw_sedan",
+      "joint_label": "BMW sedan",
+      "attributes": [
+        "BMW kidney grille",
+        "sedan body shape"
+      ],
+      "scope": "main17",
+      "stages": [
+        "iterative"
+      ]
+    },
+    {
+      "order": 3,
+      "task_id": "003_cars_task_ford_mustang_convertible_two_door",
+      "dataset": "cars",
+      "task": "task_ford_mustang_convertible_two_door",
+      "joint_label": "Ford Mustang convertible two-door",
+      "attributes": [
+        "Ford brand identity",
+        "Mustang model family",
+        "Convertible body type"
+      ],
+      "scope": "main17",
+      "stages": [
+        "iterative"
+      ]
+    },
+    {
+      "order": 8,
+      "task_id": "008_hico_task_bike_jumping",
+      "dataset": "hico",
+      "task": "task_bike_jumping",
+      "joint_label": "Bike jumping",
+      "attributes": [
+        "bicycle",
+        "jumping"
+      ],
+      "scope": "main17",
+      "stages": [
+        "iterative"
+      ]
+    },
+    {
+      "order": 9,
+      "task_id": "009_hico_task_bicycle_riding_no_jump",
+      "dataset": "hico",
+      "task": "task_bicycle_riding_no_jump",
+      "joint_label": "Bicycle riding (no jump)",
+      "attributes": [
+        "bicycle",
+        "not jumping",
+        "not bike jump"
+      ],
+      "scope": "main17",
+      "stages": [
+        "iterative"
+      ]
+    },
+    {
+      "order": 17,
+      "task_id": "017_hico_task_hico_shearing_sheep",
+      "dataset": "hico",
+      "task": "task_hico_shearing_sheep",
+      "joint_label": "Shearing sheep",
+      "attributes": [
+        "sheep",
+        "shearing"
+      ],
+      "scope": "main17",
+      "stages": [
+        "iterative"
+      ]
+    },
+    {
+      "order": 18,
+      "task_id": "018_hico_task_hico_typing_on_keyboard",
+      "dataset": "hico",
+      "task": "task_hico_typing_on_keyboard",
+      "joint_label": "Typing on keyboard",
+      "attributes": [
+        "keyboard",
+        "typing"
+      ],
+      "scope": "main17",
+      "stages": [
+        "iterative"
+      ]
+    },
+    {
+      "order": 19,
+      "task_id": "019_cars_task_hyundai_hatchback",
+      "dataset": "cars",
+      "task": "task_hyundai_hatchback",
+      "joint_label": "Hyundai hatchback",
+      "attributes": [
+        "Hyundai",
+        "Hatchback"
+      ],
+      "scope": "main17",
+      "stages": [
+        "iterative"
+      ]
+    },
+    {
+      "order": 20,
+      "task_id": "020_hico_task_hico_directing_airplane",
+      "dataset": "hico",
+      "task": "task_hico_directing_airplane",
+      "joint_label": "Directing airplane",
+      "attributes": [
+        "airplane",
+        "directing"
+      ],
+      "scope": "main17",
+      "stages": [
+        "iterative"
+      ]
+    },
+    {
+      "order": 31,
+      "task_id": "031_hico_task_hico_sailing_boat",
+      "dataset": "hico",
+      "task": "task_hico_sailing_boat",
+      "joint_label": "Sailing boat",
+      "attributes": [
+        "boat",
+        "sailing"
+      ],
+      "scope": "main17",
+      "stages": [
+        "iterative"
+      ]
+    },
+    {
+      "order": 33,
+      "task_id": "033_hico_task_hico_herding_cow",
+      "dataset": "hico",
+      "task": "task_hico_herding_cow",
+      "joint_label": "Herding cow",
+      "attributes": [
+        "cow",
+        "herding"
+      ],
+      "scope": "main17",
+      "stages": [
+        "iterative"
+      ]
+    },
+    {
+      "order": 37,
+      "task_id": "037_hico_task_hico_reading_book",
+      "dataset": "hico",
+      "task": "task_hico_reading_book",
+      "joint_label": "Reading a book",
+      "attributes": [
+        "book",
+        "reading"
+      ],
+      "scope": "main17",
+      "stages": [
+        "iterative"
+      ]
+    },
+    {
+      "order": 42,
+      "task_id": "042_cars_task_honda_minivan",
+      "dataset": "cars",
+      "task": "task_honda_minivan",
+      "joint_label": "Honda minivan",
+      "attributes": [
+        "Honda",
+        "Minivan"
+      ],
+      "scope": "main17",
+      "stages": [
+        "iterative"
+      ]
+    },
+    {
+      "order": 43,
+      "task_id": "043_cars_task_jeep_suv",
+      "dataset": "cars",
+      "task": "task_jeep_suv",
+      "joint_label": "Jeep SUV",
+      "attributes": [
+        "Jeep",
+        "SUV"
+      ],
+      "scope": "main17",
+      "stages": [
+        "iterative"
+      ]
+    },
+    {
+      "order": 45,
+      "task_id": "045_cars_task_gmc_van",
+      "dataset": "cars",
+      "task": "task_gmc_van",
+      "joint_label": "GMC van",
+      "attributes": [
+        "GMC",
+        "Van"
+      ],
+      "scope": "main17",
+      "stages": [
+        "iterative"
+      ]
+    },
+    {
+      "order": 6,
+      "task_id": "006_celeba_task_celeba_gray_hair_eyeglasses_male",
+      "dataset": "celeba",
+      "task": "task_celeba_gray_hair_eyeglasses_male",
+      "joint_label": "Gray hair + eyeglasses + male",
+      "attributes": [
+        "Gray_Hair",
+        "Eyeglasses",
+        "Male"
+      ],
+      "scope": "main17",
+      "stages": [
+        "iterative"
+      ]
+    },
+    {
+      "order": 52,
+      "task_id": "052_celeba_task_celeba_eyeglasses_smiling_necktie",
+      "dataset": "celeba",
+      "task": "task_celeba_eyeglasses_smiling_necktie",
+      "joint_label": "Eyeglasses, smiling, and necktie",
+      "attributes": [
+        "Eyeglasses",
+        "Smiling",
+        "Wearing_Necktie"
+      ],
+      "scope": "main17",
+      "stages": [
+        "iterative"
+      ]
+    }
+  ]
+}

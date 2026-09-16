@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "project": "ProbeScout",
+  "status": "local-source-prepared-assets-not-uploaded",
+  "github": {
+    "purpose": "source-configurations-manifests",
+    "large_binary_assets": false,
+    "human_feedback_data": false
+  },
+  "hugging_face": {
+    "purpose": "pretrained-probes-features-frozen-initial-evidence",
+    "model_repository_id": null,
+    "dataset_repository_ids": [],
+    "revision": null,
+    "human_feedback_data": false,
+    "allowed_artifact_types": [
+      "frozen-pre-human-feedback-probe-checkpoint",
+      "frozen-probe-score",
+      "siglip-global-feature",
+      "siglip-patch-feature",
+      "feature-index-metadata",
+      "original-vqa-training-supervision",
+      "frozen-evaluation-split",
+      "initial-fusion-evidence"
+    ]
+  },
+  "excluded_artifact_types": [
+    "human-feedback-annotation",
+    "human-feedback-snapshot",
+    "user-session",
+    "user-database",
+    "human-refined-model",
+    "human-refined-score",
+    "human-case-replay"
+  ],
+  "feedback_algorithm_source": "included",
+  "paper_initial_version": "f0-val-36-20260908",
+  "download_manifest_requires": [
+    "artifact_id", "artifact_type", "relative_path", "size_bytes", "sha256",
+    "dataset_id", "image_ids_sha256", "source_provenance", "dependencies",
+    "repo_type", "repo_id", "revision", "license"
+  ]
+}

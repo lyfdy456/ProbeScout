@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "suite_id": "probescout-paper-eight-probes",
+  "description": "The eight probe configurations; paper F0 is evaluated separately.",
+  "embedding_methods": [
+    "query_maxsim",
+    "text_prompt_ensemble"
+  ],
+  "learned_methods": [
+    "mlp_baseline",
+    "kfold_pu",
+    "triplet_loss",
+    "attention_pooling",
+    "attribute_conditioned_attention",
+    "nnpu",
+    "dcpu",
+    "pu_ranking"
+  ],
+  "method_display_names": {
+    "mlp_baseline": "MLP",
+    "kfold_pu": "K-Fold",
+    "triplet_loss": "Triplet Loss",
+    "attention_pooling": "Attention Pooling",
+    "attribute_conditioned_attention": "Attribute-conditioned Attention",
+    "nnpu": "nnPU",
+    "dcpu": "DC-PU",
+    "pu_ranking": "PURA"
+  },
+  "joint_rules": [
+    "product"
+  ],
+  "fusion_recipes": [],
+  "posthoc_joint_rules": [],
+  "posthoc_base_methods": []
+}

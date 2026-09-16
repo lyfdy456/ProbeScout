@@ -1,0 +1,322 @@
+{
+  "schema_version": 1,
+  "initial_version": "f0-val-36-20260908",
+  "task_count": 17,
+  "method_ids": [
+    "mlp_baseline",
+    "kfold_pu",
+    "triplet_loss",
+    "attention_pooling",
+    "attribute_conditioned_attention",
+    "nnpu",
+    "dcpu",
+    "pu_ranking"
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "human_feedback_data": "excluded",
+  "tasks": [
+    {
+      "task_id": "001_cars_task_bmw_convertible",
+      "label": "BMW convertible",
+      "dataset": "cars",
+      "attribute_ids": [
+        "bmw",
+        "convertible"
+      ],
+      "attribute_names": [
+        "BMW brand identity",
+        "Convertible body type with soft-top roof"
+      ],
+      "bank_directory": "78d900da194b76782dadb08cc94f093bb83e4f9e56179b001a52babb40351994",
+      "bank_fingerprint": "35822e055e8e42835d4e9f86c6bca3bcc7dcd8cb7e027436b5c6d153a47e4bb8",
+      "image_ids_sha256": "b825e686ce59546e0b5e50c5c00a2ba448d2d14d0a303f8853f5a0f11d2aea07",
+      "initial_scores_sha256": "5e96871a839a6d88df102f7be294976934b3b637daa7e94f11ed540c080e19bf"
+    },
+    {
+      "task_id": "002_cars_task_bmw_sedan",
+      "label": "BMW sedan",
+      "dataset": "cars",
+      "attribute_ids": [
+        "bmw",
+        "sedan"
+      ],
+      "attribute_names": [
+        "BMW kidney grille",
+        "sedan body shape"
+      ],
+      "bank_directory": "3014bce5c4580b74e295bc1e002eb6e3ade54881277862494e3e5b8d33a72ff0",
+      "bank_fingerprint": "8583fcc267c638d6a2b82b5145b96f8d71b46c4a6e73ad5ebe9a16baa0430e90",
+      "image_ids_sha256": "b825e686ce59546e0b5e50c5c00a2ba448d2d14d0a303f8853f5a0f11d2aea07",
+      "initial_scores_sha256": "0cd1169fa7ac849c70f2ae95219f7e0bcded7149deb8706245197739c75fafc4"
+    },
+    {
+      "task_id": "003_cars_task_ford_mustang_convertible_two_door",
+      "label": "Ford Mustang convertible two-door",
+      "dataset": "cars",
+      "attribute_ids": [
+        "ford",
+        "mustang",
+        "convertible"
+      ],
+      "attribute_names": [
+        "Ford brand identity",
+        "Mustang model family",
+        "Convertible body type"
+      ],
+      "bank_directory": "f9212a839162675a5c7410a2fb2e293c031c7eb2461cbafc4b726def7d416b32",
+      "bank_fingerprint": "36062990b413352f34b8492e5aae777adb068f1eb5744c24641682e9971d4555",
+      "image_ids_sha256": "b825e686ce59546e0b5e50c5c00a2ba448d2d14d0a303f8853f5a0f11d2aea07",
+      "initial_scores_sha256": "21308212e10e18f216943470979c1631fd5ae2a5ffd0bea632e7dd2b1705962a"
+    },
+    {
+      "task_id": "008_hico_task_bike_jumping",
+      "label": "Bike jumping",
+      "dataset": "hico",
+      "attribute_ids": [
+        "bicycle",
+        "jumping"
+      ],
+      "attribute_names": [
+        "bicycle",
+        "jumping"
+      ],
+      "bank_directory": "e417cf8022e01f5fab700c66fe60e698cf2eb4de05fca0e0c1aea4b97ad44544",
+      "bank_fingerprint": "21a87e824d5465dce07c0d66fe358b680e81db1393c78a0c6866cae48ec2c230",
+      "image_ids_sha256": "864d0784b536c832ec331e783fc4f1eb2a1b2ee5cac0e48c38c4a80fbd3df4dc",
+      "initial_scores_sha256": "3d882eec5a9dfb120a038b4807fbb623dfe0c22e62cbead4486255360052704b"
+    },
+    {
+      "task_id": "009_hico_task_bicycle_riding_no_jump",
+      "label": "Bicycle riding (no jump)",
+      "dataset": "hico",
+      "attribute_ids": [
+        "bicycle",
+        "not_jumping",
+        "not_bike_jump"
+      ],
+      "attribute_names": [
+        "bicycle",
+        "not jumping",
+        "not bike jump"
+      ],
+      "bank_directory": "6f6b08480ac4dd50d5dd16f3e29b8042da5c2c4b941ccb6e28eba684d044df0b",
+      "bank_fingerprint": "2d37ed946e10195fdcb0d64d572b61575f322cd2dba8a986850023fce2972f11",
+      "image_ids_sha256": "864d0784b536c832ec331e783fc4f1eb2a1b2ee5cac0e48c38c4a80fbd3df4dc",
+      "initial_scores_sha256": "d750e50e8d9b01379088b5f48018d0e4e9cd49b19593d4c4361d01679cfa7d4f"
+    },
+    {
+      "task_id": "017_hico_task_hico_shearing_sheep",
+      "label": "Shearing sheep",
+      "dataset": "hico",
+      "attribute_ids": [
+        "sheep",
+        "shearing"
+      ],
+      "attribute_names": [
+        "sheep",
+        "shearing"
+      ],
+      "bank_directory": "a610820915e52a26bf5fe1c51e241f0a917fa6225dc6848f978fa6af35d26c01",
+      "bank_fingerprint": "30525d4cfb30bd55cf986d8a29e819d11db2591d7649eacd3afafdc6885ca7aa",
+      "image_ids_sha256": "864d0784b536c832ec331e783fc4f1eb2a1b2ee5cac0e48c38c4a80fbd3df4dc",
+      "initial_scores_sha256": "07c12b2bb7caa0e3e8a05ddc7457d39b2599ad2a35b2c865c9289334218007fe"
+    },
+    {
+      "task_id": "018_hico_task_hico_typing_on_keyboard",
+      "label": "Typing on keyboard",
+      "dataset": "hico",
+      "attribute_ids": [
+        "keyboard",
+        "typing"
+      ],
+      "attribute_names": [
+        "keyboard",
+        "typing"
+      ],
+      "bank_directory": "6a1d35ffd8b1913af6b3b440763ebe3f7db4ed9fc92bc309013fcd64f4cdcb9c",
+      "bank_fingerprint": "f403f698ce1600190e5a8cc04a4ef0484c00c012a38f6643860d91d9ea8a7d16",
+      "image_ids_sha256": "864d0784b536c832ec331e783fc4f1eb2a1b2ee5cac0e48c38c4a80fbd3df4dc",
+      "initial_scores_sha256": "d32c816e74a8816a2faecc1e0312c6e932b65d143d2d0bb3f0038ccac4257f66"
+    },
+    {
+      "task_id": "019_cars_task_hyundai_hatchback",
+      "label": "Hyundai hatchback",
+      "dataset": "cars",
+      "attribute_ids": [
+        "class_name_startswith",
+        "class_name_contains"
+      ],
+      "attribute_names": [
+        "Hyundai",
+        "Hatchback"
+      ],
+      "bank_directory": "97b3a746c8202252a481227ed200ebc5e0be870821bc997d88993ba95a30565d",
+      "bank_fingerprint": "28c31bcdec7768339cc0958beb83db70bf4748e7b532a0fc6af83b1ad92d2580",
+      "image_ids_sha256": "b825e686ce59546e0b5e50c5c00a2ba448d2d14d0a303f8853f5a0f11d2aea07",
+      "initial_scores_sha256": "cba4a36c662b98181166a15577efe285c9d37d94bcb56a4c23f7d08922668750"
+    },
+    {
+      "task_id": "020_hico_task_hico_directing_airplane",
+      "label": "Directing airplane",
+      "dataset": "hico",
+      "attribute_ids": [
+        "airplane",
+        "directing"
+      ],
+      "attribute_names": [
+        "airplane",
+        "directing"
+      ],
+      "bank_directory": "98ab65b2adea8efbbdb426543e0ef0888401cf76a0bdef1f86ab83106df6ba90",
+      "bank_fingerprint": "60cba663b96fdb2e136f38c1d54fa00f1798548c54f51d43c1ea235644de1259",
+      "image_ids_sha256": "864d0784b536c832ec331e783fc4f1eb2a1b2ee5cac0e48c38c4a80fbd3df4dc",
+      "initial_scores_sha256": "99cbaab9eeda8f279967397d615518fd52cf363fdb9b981ade103ed51056bc32"
+    },
+    {
+      "task_id": "031_hico_task_hico_sailing_boat",
+      "label": "Sailing boat",
+      "dataset": "hico",
+      "attribute_ids": [
+        "boat",
+        "sailing"
+      ],
+      "attribute_names": [
+        "boat",
+        "sailing"
+      ],
+      "bank_directory": "2c9bb64ee8c1e33faa3432b6636c42ecf0e855fe225ee36591e83156d2cb910b",
+      "bank_fingerprint": "05adcbcd0abb9f0d1bb391d1682b80515896906e006d85a34249a27c740170bd",
+      "image_ids_sha256": "864d0784b536c832ec331e783fc4f1eb2a1b2ee5cac0e48c38c4a80fbd3df4dc",
+      "initial_scores_sha256": "7c6ef825ac5909346c644ebc09433aff3b245beae5f5dc7358e58b1060879c95"
+    },
+    {
+      "task_id": "033_hico_task_hico_herding_cow",
+      "label": "Herding cow",
+      "dataset": "hico",
+      "attribute_ids": [
+        "cow",
+        "herding"
+      ],
+      "attribute_names": [
+        "cow",
+        "herding"
+      ],
+      "bank_directory": "4590ff9ce5dec69ac3ef1430d2a9322468e7fdc280cb456b89e599cb22d17284",
+      "bank_fingerprint": "9b6e4e029c312bc664c24ea641ec6228150bc36eb74013e1b6936a2a25310566",
+      "image_ids_sha256": "864d0784b536c832ec331e783fc4f1eb2a1b2ee5cac0e48c38c4a80fbd3df4dc",
+      "initial_scores_sha256": "f026281e79a0444deea1557dc5bf8675bd72af3786532ecf1d0ccde8b550fc3a"
+    },
+    {
+      "task_id": "037_hico_task_hico_reading_book",
+      "label": "Reading a book",
+      "dataset": "hico",
+      "attribute_ids": [
+        "book",
+        "reading"
+      ],
+      "attribute_names": [
+        "book",
+        "reading"
+      ],
+      "bank_directory": "c24bb832262a00f0a92037ba351b5fec1dc2d80691e8f67d21f9aa9283e3b989",
+      "bank_fingerprint": "9a20705acff4c557268155fc1dc7c5282c9058a209f346999d064e663b7c1413",
+      "image_ids_sha256": "864d0784b536c832ec331e783fc4f1eb2a1b2ee5cac0e48c38c4a80fbd3df4dc",
+      "initial_scores_sha256": "11e60ff531c4a68cb3d58efc03bde8b08aca2e963dc759ed3b6f0064c0c71551"
+    },
+    {
+      "task_id": "042_cars_task_honda_minivan",
+      "label": "Honda minivan",
+      "dataset": "cars",
+      "attribute_ids": [
+        "class_name_startswith",
+        "class_name_contains"
+      ],
+      "attribute_names": [
+        "Honda",
+        "Minivan"
+      ],
+      "bank_directory": "c0ee2de8b923f5c1be7d99f2aae6a9b3387f208b0e35a0e3f13bc89396f35cec",
+      "bank_fingerprint": "c633e5b3db0a4a961975bb5a9234aaaeb2beb1bb8e31cffb0ab107ce8be530c8",
+      "image_ids_sha256": "b825e686ce59546e0b5e50c5c00a2ba448d2d14d0a303f8853f5a0f11d2aea07",
+      "initial_scores_sha256": "61d3c2246b443d71fa36514217c8801a0f04ae487116e04e36ccbf5a10b5ca10"
+    },
+    {
+      "task_id": "043_cars_task_jeep_suv",
+      "label": "Jeep SUV",
+      "dataset": "cars",
+      "attribute_ids": [
+        "class_name_startswith",
+        "class_name_contains"
+      ],
+      "attribute_names": [
+        "Jeep",
+        "SUV"
+      ],
+      "bank_directory": "f6eb6b1dcbc1624e3d0e1eb4369464cfd7c5274085daf184fac8ef119fbe21ac",
+      "bank_fingerprint": "a9766efa58bcca7a2c93aee80a9ccb799515bc4ad4745e901fa39935ad5ce2e9",
+      "image_ids_sha256": "b825e686ce59546e0b5e50c5c00a2ba448d2d14d0a303f8853f5a0f11d2aea07",
+      "initial_scores_sha256": "f2df117361122436427ad60b1473eb5a9dbfccbf9cd13326740a50311b4f594e"
+    },
+    {
+      "task_id": "045_cars_task_gmc_van",
+      "label": "GMC van",
+      "dataset": "cars",
+      "attribute_ids": [
+        "class_name_startswith",
+        "class_name_contains"
+      ],
+      "attribute_names": [
+        "GMC",
+        "Van"
+      ],
+      "bank_directory": "e5ffee90f77ab8a4dafb111fe43fbff525d7ed3ceabe25b442339831f7878e74",
+      "bank_fingerprint": "49c3d582ae7f570b797e98412130997c77b60600a7ca65cd8dce60435146b43c",
+      "image_ids_sha256": "b825e686ce59546e0b5e50c5c00a2ba448d2d14d0a303f8853f5a0f11d2aea07",
+      "initial_scores_sha256": "a34fc384b431138ff497c86241fb5599edaaa16e380d1d660a9d0c0cfba38d2f"
+    },
+    {
+      "task_id": "006_celeba_task_celeba_gray_hair_eyeglasses_male",
+      "label": "Gray hair + eyeglasses + male",
+      "dataset": "celeba",
+      "attribute_ids": [
+        "gray_hair",
+        "eyeglasses",
+        "male"
+      ],
+      "attribute_names": [
+        "Gray_Hair",
+        "Eyeglasses",
+        "Male"
+      ],
+      "bank_directory": "d10d00f4d1d289579b6d0f9d0c6798ad045a4ceb50c0d1982943b04500a856c2",
+      "bank_fingerprint": "59ff40c8a2c2f167d20261397dddf40ac9e109bf836879e5459ecbe9f41f4727",
+      "image_ids_sha256": "23d63b8aa49417ef32e90af6835fa4622820e0d1c1c9d682b493ed1dd5c54c3e",
+      "initial_scores_sha256": "b1dd2eb501961779eb99c72652c7da64ef1597ab2cff3580f583cfb79c4267c6"
+    },
+    {
+      "task_id": "052_celeba_task_celeba_eyeglasses_smiling_necktie",
+      "label": "Eyeglasses, smiling, and necktie",
+      "dataset": "celeba",
+      "attribute_ids": [
+        "eyeglasses",
+        "smiling",
+        "wearing_necktie"
+      ],
+      "attribute_names": [
+        "Eyeglasses",
+        "Smiling",
+        "Wearing_Necktie"
+      ],
+      "bank_directory": "902aaa13ed6e36df62d55413ab65feff572ef8b47bf37c63f9cc9516aab10dd6",
+      "bank_fingerprint": "87bf2c097d6fdd3b96000159f01a509084238e770518c2a62b2583861c60d920",
+      "image_ids_sha256": "23d63b8aa49417ef32e90af6835fa4622820e0d1c1c9d682b493ed1dd5c54c3e",
+      "initial_scores_sha256": "e3f2fb20eb30fea7f40d1d581fa6c0af7589e117e1fcaf75ef32eb4193aa36a1"
+    }
+  ]
+}

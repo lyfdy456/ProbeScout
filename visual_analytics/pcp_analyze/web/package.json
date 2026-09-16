@@ -1,0 +1,48 @@
+{
+  "name": "probescout-visual-analytics",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:web": "vinext dev --hostname 127.0.0.1 --port 3000",
+    "tuning:server": "node scripts/run-python.mjs scripts/tuning_server.py",
+    "test:tuning": "node scripts/run-python.mjs -B -m unittest discover -s tests -t . -p test_*.py",
+    "build": "vinext build",
+    "start": "vinext start",
+    "test": "npm run test:unit",
+    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
+    "data:scores": "uv run --project ../../../probe_learning python ../export_multitarget_scores.py",
+    "data:fine-clusters": "node scripts/run-python.mjs scripts/add_fine_clusters.py",
+    "data:export": "npm run data:scores && node scripts/run-python.mjs scripts/export_web_data.py && npm run data:fine-clusters",
+    "data:visual": "node scripts/run-python.mjs scripts/export_task_bundles.py --visual-only",
+    "test:unit": "node --test tests/*.test.mjs",
+    "data:main17": "node scripts/run-python.mjs scripts/export_task_bundles.py",
+    "test:assets": "node --test tests/integration/*.test.mjs"
+  },
+  "dependencies": {
+    "d3": "7.9.0",
+    "next": "16.2.6",
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.2.1",
+    "@types/d3": "7.4.3",
+    "@types/node": "22.19.19",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.2",
+    "@vitejs/plugin-rsc": "0.5.26",
+    "eslint": "9.39.4",
+    "eslint-config-next": "16.2.6",
+    "react-server-dom-webpack": "19.2.6",
+    "tailwindcss": "4.2.1",
+    "typescript": "5.9.3",
+    "vinext": "0.0.50",
+    "vite": "8.0.13"
+  },
+  "type": "module"
+}

@@ -1,0 +1,32 @@
+[project]
+name = "probescout-learning"
+version = "0.1.0"
+description = "ProbeScout feature extraction, attribute probe learning, and retrieval evaluation"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "clip @ git+https://github.com/openai/CLIP.git@d05afc436d78f1c48dc0dbf8e5980a9d471f35f6",
+    "numpy>=2.4.4",
+    "pandas>=3.0.2",
+    "pillow>=12.2.0",
+    "openai>=1.0.0",
+    "protobuf>=7.35.1",
+    "pyyaml>=6.0.0",
+    "scipy>=1.13.0",
+    "scikit-learn>=1.8.0",
+    "sentencepiece>=0.2.2",
+    "torch>=2.6.0",
+    "torchvision>=0.21.0",
+    "tqdm>=4.67.3",
+    "transformers>=5.8.1",
+    "umap-learn>=0.5.12",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+torchvision = { index = "pytorch-cu128" }

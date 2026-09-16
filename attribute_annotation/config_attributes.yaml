@@ -1,0 +1,88 @@
+# 三阶段 VQA 属性抽取 pipeline 配置
+# Stage1 逐图描述 -> Stage2 总结共性属性(JSON) -> Stage3 自动筛选 -> {attr1, attr2, ...}
+
+api_key: ""
+base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+model: "qwen-vl-max"
+
+# query 图目录 与 输出目录（默认写到该 task 的 qa/ 下）
+query_dir: "x:/1research/linearprobing/experiment/dataset/tasks/task_bmw_convertible/query pics"
+out_dir: "x:/1research/linearprobing/experiment/dataset/tasks/task_bmw_convertible/qa"
+
+# Stage3 自动筛选参数
+# 硬性规则：属性必须在每张 query 图中都出现（unclear_or_absent_images 为空）；verifiability 必须为 high
+max_attrs: 6                 # 最终保留的属性上限
+allow_subjectivity: ["low", "medium"]     # 允许的主观性上限
+allow_verifiability: ["high"]             # 仅保留 high（排除 medium / low）
+
+# 运行参数
+max_tokens: 2048
+timeout: 90
+max_retries: 4
+workers: 5                   # Stage1 逐图描述的并发数
+
+# ── Stage1: 单张 query 图详细描述 ──
+prompt_stage1: |
+  You are given a query image from a fine-grained image retrieval task.
+
+  Describe the image in as much visual detail as possible. Focus only on visible information.
+
+  Please include:
+  1. Main object/category
+  2. Exact object color, texture, and shape
+  3. Important parts and their exact visible attributes
+  4. Background or scene
+  5. Pose, viewpoint, spatial layout, and composition
+  6. Lighting, blur, image quality, and visual style
+  7. Weather-, atmosphere-, or condition-related visible cues, such as rain streaks, wet surfaces, droplets, puddles, mist, haze, overcast sky, dim light, or harsh sunlight
+  8. Any other visually distinctive details
+
+  Use concrete visual wording whenever possible. For example, write "vivid blue feathers on the head and body" instead of "dominant plumage color", and write "short thick conical pale beak" instead of "beak morphology".
+
+  Do not infer non-visible information.
+  Return a concise but detailed paragraph.
+
+# ── Stage2: 多张描述总结共性属性（文本输入，返回 JSON）──
+prompt_stage2: |
+  You are given detailed descriptions of several query images from the same fine-grained retrieval target.
+
+  Your task is to identify visual attributes shared by most of these query images.
+
+  The attributes should be useful as binary probing labels for candidate images. Prefer concrete, visually verifiable, value-bearing attributes.
+
+  Inclusion threshold:
+  - Let N be the number of query image descriptions.
+  - An attribute may be included only if it is visibly supported in at least floor(0.8 * N) query images.
+
+  Requirements:
+  1. Extract attributes that may help distinguish the target images from non-target images.
+  2. Provide BOTH coarse-grained and fine-grained attributes:
+     - Coarse-grained: high-level identity / category / brand / body-type concepts (e.g. "BMW vehicle", "convertible body type", "two-door sports car"). These are allowed and encouraged even though they are category-level.
+     - Fine-grained: specific value-bearing visual cues (e.g. "BMW kidney grille with vertical slats", "multi-spoke alloy wheels").
+  3. A coarse identity attribute (such as brand) may be supported by DIFFERENT visible cues in different images (e.g. front kidney grille in front views, roundel badge or model script in rear views). Mark it visible_in_images whenever ANY brand evidence is visible, and treat it as present-in-all if every image shows some brand evidence, even if the specific cue differs.
+  4. Each fine-grained attribute must be atomic and specific: one visible property or a tightly coupled part-property combination.
+  5. Separate concrete attributes from visual-quality attributes and abstract attributes.
+  6. Set shared_strength to "strong" only when clearly supported in all query descriptions; "partial" when it meets the 80% floor but is unclear/absent in at least one.
+  7. For every attribute, list image IDs in visible_in_images and unclear_or_absent_images.
+  8. Return 3 to 12 common attributes. List coarse identity/category attributes first, then fine-grained concrete attributes, then visual-quality attributes.
+
+  Query image descriptions:
+  {descriptions}
+
+  Return the result as JSON:
+
+  {
+    "target_concept_summary": "short natural language summary of the shared visual target",
+    "attributes": [
+      {
+        "name": "specific value-bearing attribute name",
+        "description": "clear definition including exact visible values and where they appear",
+        "type": "concrete | visual_quality | abstract",
+        "shared_strength": "strong | partial",
+        "visible_in_images": ["query_1", "query_2"],
+        "unclear_or_absent_images": [],
+        "verifiability": "high | medium | low",
+        "subjectivity": "low | medium | high"
+      }
+    ]
+  }

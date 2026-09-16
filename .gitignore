@@ -1,0 +1,65 @@
+# Python and Node environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+node_modules/
+.npm-cache/
+.vendor/
+.next/
+.vinext/
+.wrangler/
+build/
+dist/
+*.tsbuildinfo
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+.cookie-secret
+*.pem
+*.key
+.openai/
+
+# Features, weights, galleries and generated evidence are hosted separately
+dataset/
+**/public/data/
+**/runtime/
+artifacts/
+*.npy
+*.npz
+*.pt
+*.pth
+*.safetensors
+*.f32
+*.f64
+*.zip
+*.tar
+*.gz
+
+# Human feedback and session state are excluded from all public packages
+**/users/
+**/sessions/
+**/human_feedback/
+**/feedback_data/
+**/case_replay/
+**/labels_snapshot.json
+**/annotations.json
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+*.db
+
+# Generated output, backups and machine state
+backups/
+outputs/
+logs/
+*.log
+*.pid
+.codex*
+.DS_Store
+Thumbs.db

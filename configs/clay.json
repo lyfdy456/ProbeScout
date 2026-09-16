@@ -1,0 +1,17 @@
+{
+  "clay": {
+    "model_id": "google/siglip-base-patch16-224",
+    "max_rank": 50,
+    "prompt_bank_kind": "binary_contrast_templates",
+    "positive_templates": [
+      "a photo that clearly shows {attribute}",
+      "an image containing {attribute}",
+      "a visual example with {attribute}"
+    ],
+    "negative_templates": [
+      "a photo that clearly does not show {attribute}",
+      "an image without {attribute}",
+      "a visual example lacking {attribute}"
+    ]
+  }
+}

@@ -1,0 +1,60 @@
+# VQA 自动打标配置文件（API 模式）— task_bmw_convertible
+# 属性来自 extract_attributes.py 的自动抽取结果（粗+细粒度）
+
+api_key: ""
+base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+model: "qwen-vl-max"
+
+# 候选池 = 16185 - 5 query pics = 16180 张
+images_dir: "x:/1research/linearprobing/experiment/dataset/tasks/task_bmw_convertible/candidate_images"
+output_dir: "x:/1research/linearprobing/experiment/dataset/tasks/task_bmw_convertible/qa"
+
+prompt: |
+  You are given an image and a list of target visual attributes.
+
+  For each attribute, decide whether it is present in the image.
+
+  Use:
+  - 1 if the attribute is present
+  - 0 if the attribute is absent
+  - "unknown" if there is not enough visual evidence
+
+  For abstract, subjective, visually grounded soft, or low-verifiability attributes, make the best judgment based on visible evidence and reflect uncertainty in the confidence score.
+
+  The evidence field must cite the concrete visual cue that supports the decision, including exact color, part, shape, texture, lighting, weather-like cue, atmospheric cue, or background detail when relevant.
+
+  Note: "BMW brand identity" should be judged present if ANY BMW branding cue is visible, including the front kidney grille, the round BMW roundel badge, or a model script (e.g. "650i", "Z4"), even if only one of these cues is visible.
+
+  Target attributes:
+  {attributes}
+
+  Return the result as JSON:
+
+  {
+    "image_id": "{image_id}",
+    "attributes": {
+      "attr1": {
+        "present": 1,
+        "confidence": 0.90,
+        "evidence": "brief visual evidence"
+      },
+      "attr2": {
+        "present": 0,
+        "confidence": 0.80,
+        "evidence": "brief visual evidence"
+      }
+    }
+  }
+
+# 属性列表（插入到 prompt 的 {attributes} 位置）
+attributes: |
+  (BMW brand identity, Convertible body type with soft-top roof, multi-spoke alloy wheels, low-profile tires)
+
+# ─────────────────────────────────────────────
+# 运行参数
+# ─────────────────────────────────────────────
+concurrency: 50   # 并发线程数（可被 --workers 覆盖）
+delay: 0.2        # 每个线程单次请求后的间隔（秒）
+max_retries: 4    # 单张图片失败重试次数（含 429 退避）
+timeout: 60       # 单次请求超时（秒）
+max_tokens: 4096  # 模型最大返回 token 数

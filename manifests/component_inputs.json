@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "cohort": "main17",
+  "content": "frozen pre-human-feedback evidence and original VQA contracts",
+  "tasks": [
+    {
+      "task_id": "001_cars_task_bmw_convertible",
+      "snapshot": {
+        "path": "evaluation/component_ablation/001_cars_task_bmw_convertible.npz",
+        "sha256": "e35274f8836f7036424fe162255cbc2e2f305d28b24731e37aba91205b41a0a2"
+      },
+      "contract": {
+        "path": "evaluation/val-isolation/001_cars_task_bmw_convertible.json",
+        "sha256": "cdfcea190b9892a11bc204a9a64188ae2ca4c493b50c95d903851da4dc68a806"
+      }
+    },
+    {
+      "task_id": "002_cars_task_bmw_sedan",
+      "snapshot": {
+        "path": "evaluation/component_ablation/002_cars_task_bmw_sedan.npz",
+        "sha256": "0fcdb7718c867a833b7e52129696b00a87fb8fd8662472792e1da91800aba321"
+      },
+      "contract": {
+        "path": "evaluation/val-isolation/002_cars_task_bmw_sedan.json",
+        "sha256": "1c8e3759a567974739434d9bf617772b4d4038ec7f588aa6dbf092357a2edbf5"
+      }
+    },
+    {
+      "task_id": "003_cars_task_ford_mustang_convertible_two_door",
+      "snapshot": {
+        "path": "evaluation/component_ablation/003_cars_task_ford_mustang_convertible_two_door.npz",
+        "sha256": "88d566b1942b6212428ecd211752289441cec07a26b34f20678ac486201657a8"
+      },
+      "contract": {
+        "path": "evaluation/val-isolation/003_cars_task_ford_mustang_convertible_two_door.json",
+        "sha256": "272029b08e670916ee1f0147e6ff5d4d844544f2f0d1d4c2c340da935a22f3da"
+      }
+    },
+    {
+      "task_id": "008_hico_task_bike_jumping",
+      "snapshot": {
+        "path": "evaluation/component_ablation/008_hico_task_bike_jumping.npz",
+        "sha256": "214f6236f2ae379fa16e2efe7fe80f5ca124b609e9dc261a29abb4202cb24f4a"
+      },
+      "contract": {
+        "path": "evaluation/val-isolation/008_hico_task_bike_jumping.json",
+        "sha256": "ab82a1e078306b1a4f23e6f7c3ac1749f88b69b1041e6e1d4e53a001b5a55f25"
+      }
+    },
+    {
+      "task_id": "009_hico_task_bicycle_riding_no_jump",
+      "snapshot": {
+        "path": "evaluation/component_ablation/009_hico_task_bicycle_riding_no_jump.npz",
+        "sha256": "9e4dca4c43d03da05ce942c457781cfa7814ad60df13e96716838e94b9469b22"
+      },
+      "contract": {
+        "path": "evaluation/val-isolation/009_hico_task_bicycle_riding_no_jump.json",
+        "sha256": "befe428eb85b4b4cff69c87ddb81638b8f1aef7572a9926f2c099f96aad77435"
+      }
+    },
+    {
+      "task_id": "017_hico_task_hico_shearing_sheep",
+      "snapshot": {
+        "path": "evaluation/component_ablation/017_hico_task_hico_shearing_sheep.npz",
+        "sha256": "f98fa81ff839952a7051ff934b1a0f273366089f70c80618db545f308ef9b2b8"
+      },
+      "contract": {
+        "path": "evaluation/val-isolation/017_hico_task_hico_shearing_sheep.json",
+        "sha256": "b3d4fa510c5123f9cd980a16a0b252974f11bd3b570e34c6a3f9b139ce8a0d98"
+      }
+    },
+    {
+      "task_id": "018_hico_task_hico_typing_on_keyboard",
+      "snapshot": {
+        "path": "evaluation/component_ablation/018_hico_task_hico_typing_on_keyboard.npz",
+        "sha256": "66c039c052813190de5f8f99827750304b580870f2ae6aaa1c45a4e15ef940f2"
+      },
+      "contract": {
+        "path": "evaluation/val-isolation/018_hico_task_hico_typing_on_keyboard.json",
+        "sha256": "597728a77f94bd30769b10d675a269a6aa3ab469c5bbdbbc60ec7c4391f27357"
+      }
+    },
+    {
+      "task_id": "019_cars_task_hyundai_hatchback",
+      "snapshot": {
+        "path": "evaluation/component_ablation/019_cars_task_hyundai_hatchback.npz",
+        "sha256": "5f793cd6a99c63df7294fcd72afc59ceaf0facef19715b78844634479fe61c83"
+      },
+      "contract": {
+        "path": "evaluation/val-isolation/019_cars_task_hyundai_hatchback.json",
+        "sha256": "107eaaf0e16e45e572492383928288c7e00ea7e6e52758613148d0db5f131be8"
+      }
+    },
+    {
+      "task_id": "020_hico_task_hico_directing_airplane",
+      "snapshot": {
+        "path": "evaluation/component_ablation/020_hico_task_hico_directing_airplane.npz",
+        "sha256": "b3c248f2e20e9b4598b6f56bd3484b6836b22f79eababeef5a52ceb74579d6e7"
+      },
+      "contract": {
+        "path": "evaluation/val-isolation/020_hico_task_hico_directing_airplane.json",
+        "sha256": "0238290cba7f06294aa3e44501d0a29fc122cc1d9a838e4c4c4da31aeec03dbb"
+      }
+    },
+    {
+      "task_id": "031_hico_task_hico_sailing_boat",
+      "snapshot": {
+        "path": "evaluation/component_ablation/031_hico_task_hico_sailing_boat.npz",
+        "sha256": "1b8536bc098070fd9ed5523e70eed7bb0c730f913e8e2db2dbc4bddec6fc63d2"
+      },
+      "contract": {
+        "path": "evaluation/val-isolation/031_hico_task_hico_sailing_boat.json",
+        "sha256": "2a978dccfcf5cc34e9caccb02cdd27ae702596b4356d09a7c9523ee7d268aafe"
+      }
+    },
+    {
+      "task_id": "033_hico_task_hico_herding_cow",
+      "snapshot": {
+        "path": "evaluation/component_ablation/033_hico_task_hico_herding_cow.npz",
+        "sha256": "9143c6b62ef64aaec4458ef6dacbabf2d449d513ae1e63e6b4eddf9bc0908c87"
+      },
+      "contract": {
+        "path": "evaluation/val-isolation/033_hico_task_hico_herding_cow.json",
+        "sha256": "d6225d5693e333304b986edd0e15c3549b593fad77914ef0af9509934300eab2"
+      }
+    },
+    {
+      "task_id": "037_hico_task_hico_reading_book",
+      "snapshot": {
+        "path": "evaluation/component_ablation/037_hico_task_hico_reading_book.npz",
+        "sha256": "ec2aadfc8d345c90523a1dfc8d3dc5e46b88446dc4be23f41f33abe06d28ca51"
+      },
+      "contract": {
+        "path": "evaluation/val-isolation/037_hico_task_hico_reading_book.json",
+        "sha256": "3bdf1dd8c65f28242b3f7d5a17b204af13815afa36196f3fce27a910b1c3370b"
+      }
+    },
+    {
+      "task_id": "042_cars_task_honda_minivan",
+      "snapshot": {
+        "path": "evaluation/component_ablation/042_cars_task_honda_minivan.npz",
+        "sha256": "e76075538f2c9475f95ff7f6e143695876348e1e98c8d3083fa3255c56f46f51"
+      },
+      "contract": {
+        "path": "evaluation/val-isolation/042_cars_task_honda_minivan.json",
+        "sha256": "a5de4b001592d61d97a5e5af9140ecc0c77823a4d411a4854b26c78fefa17eab"
+      }
+    },
+    {
+      "task_id": "043_cars_task_jeep_suv",
+      "snapshot": {
+        "path": "evaluation/component_ablation/043_cars_task_jeep_suv.npz",
+        "sha256": "89c9b6bc19dbf1aab44c00be19ea25413c4fcc7a1829e3e09cccd62906036089"
+      },
+      "contract": {
+        "path": "evaluation/val-isolation/043_cars_task_jeep_suv.json",
+        "sha256": "7bbbd72a97e94f256ee1b645b95d399fff3c99ec817e0f2ba131a0f79489ca10"
+      }
+    },
+    {
+      "task_id": "045_cars_task_gmc_van",
+      "snapshot": {
+        "path": "evaluation/component_ablation/045_cars_task_gmc_van.npz",
+        "sha256": "43a4b3225e01ea6c4adeb9dc0c138195bd7cb54dee498ac0b20d3fc135f60d4a"
+      },
+      "contract": {
+        "path": "evaluation/val-isolation/045_cars_task_gmc_van.json",
+        "sha256": "67e3165047015e5a469acecf6c74b1d3669f4c5f9209735f194a26ca1ccbe101"
+      }
+    },
+    {
+      "task_id": "006_celeba_task_celeba_gray_hair_eyeglasses_male",
+      "snapshot": {
+        "path": "evaluation/component_ablation/006_celeba_task_celeba_gray_hair_eyeglasses_male.npz",
+        "sha256": "ad76e7972df96b4263db090e43ce7c32830c88fb02e554918e3b1e2ad3496b1b"
+      },
+      "contract": {
+        "path": "evaluation/val-isolation/006_celeba_task_celeba_gray_hair_eyeglasses_male.json",
+        "sha256": "e437fb6b54d5159d0061fab3eb0ed228bf2a12f376750e388d986846c3322c9f"
+      }
+    },
+    {
+      "task_id": "052_celeba_task_celeba_eyeglasses_smiling_necktie",
+      "snapshot": {
+        "path": "evaluation/component_ablation/052_celeba_task_celeba_eyeglasses_smiling_necktie.npz",
+        "sha256": "f3a569fbfb9fb4b02d988732f358ea3d0738ef875735317e397bcc1abbeca1db"
+      },
+      "contract": {
+        "path": "evaluation/val-isolation/052_celeba_task_celeba_eyeglasses_smiling_necktie.json",
+        "sha256": "0de12f13f5e73c9396e3ac95791134d0aacdfd0b7a806c87e4e72f3ae821c291"
+      }
+    }
+  ]
+}

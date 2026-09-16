@@ -1,0 +1,41 @@
+{
+  "cohort_manifest": "manifests/paper_main17.json",
+  "embedding_strength": 0.25,
+  "theta_shifts": [
+    0.0,
+    -0.05,
+    0.05,
+    -0.1,
+    0.1
+  ],
+  "temperature_scales": [
+    1.0,
+    1.5,
+    2.0,
+    3.0
+  ],
+  "temperature_cap": 0.3,
+  "selection": "original-vqa-val-ap",
+  "variants": [
+    {
+      "id": "full",
+      "softgate": true,
+      "embedding": true
+    },
+    {
+      "id": "no_softgate",
+      "softgate": false,
+      "embedding": true
+    },
+    {
+      "id": "no_embedding",
+      "softgate": true,
+      "embedding": false
+    },
+    {
+      "id": "neither",
+      "softgate": false,
+      "embedding": false
+    }
+  ]
+}

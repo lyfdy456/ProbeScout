@@ -1,0 +1,23 @@
+{
+  "cohort_manifest": "manifests/paper_main17.json",
+  "backbone": "siglip",
+  "epochs": 100,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "methods": [
+    "mlp_baseline",
+    "kfold_pu",
+    "triplet_loss",
+    "attention_pooling",
+    "attribute_conditioned_attention",
+    "nnpu",
+    "dcpu",
+    "pu_ranking"
+  ],
+  "validation": "task-common-val-isolation-v1"
+}
