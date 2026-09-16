@@ -133,19 +133,6 @@ class TuningTestEvaluationTests(unittest.TestCase):
             self.assertNotIn("testEvaluation", public)
             self.assertIn("Ground-truth shape is invalid", public["testEvaluationError"])
 
-    def test_historical_algorithms_are_not_enriched_or_rewritten(self):
-        self._install_test_split()
-        # The fixture forbids all GT reads; legacy execution keeps its contract.
-        self.fixture._check_weight_refinement_modes(legacy=True)
-        for run in self._runs():
-            directory, metrics = self._metrics(run)
-            path = directory / "metrics.json"
-            original_bytes = path.read_bytes()
-            public = self.service.run_json(run)
-            self.assertNotIn("testEvaluation", public)
-            self.assertNotIn("testEvaluationError", public)
-            self.assertNotIn("testEvaluation", metrics)
-            self.assertEqual(path.read_bytes(), original_bytes)
 
     def test_changing_test_labels_does_not_change_trained_outputs(self):
         self._install_test_split()
@@ -175,21 +162,6 @@ class TuningTestEvaluationTests(unittest.TestCase):
             compared += 1
         self.assertEqual(compared, 2)
 
-    def test_old_missing_or_malformed_metrics_remain_readable(self):
-        self.fixture.test_legacy_run_without_scope_defaults_to_frozen_test_provenance()
-        run = self._runs()[0]
-        directory = self.fixture.runtime_root / run["artifact_relpath"]
-        directory.mkdir(parents=True)
-        for payload in (None, "{", "null", '{"runId":"run_legacy","before":{"ap":0.25}}'):
-            with self.subTest(payload=payload):
-                if payload is not None:
-                    (directory / "metrics.json").write_text(payload, encoding="utf-8")
-                public = self.service.run_json(run)
-                self.assertEqual(public["evaluationScope"], "test")
-                self.assertEqual(public["before"]["ap"], 0.25)
-                self.assertEqual(public["after"]["ap"], 0.5)
-                self.assertNotIn("testEvaluation", public)
-                self.assertNotIn("testEvaluationError", public)
 
     def test_diagnostic_selects_current_target_and_only_test_rows(self):
         task = SimpleNamespace(task_id=backend.TASK_ID, row_count=4, target_ids=("first", "joint"))

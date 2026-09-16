@@ -20,4 +20,7 @@ cd probe_learning
 uv run python -B -m unittest discover -s tests
 ```
 
-Unit tests use synthetic inputs and temporary files.
+The seven core test files use synthetic inputs and temporary files. They cover
+the eight probes, checkpoint loading, holdout isolation, gate calibration,
+supervision merging, paper commands and publication exclusions. See
+[validation](../docs/validation.md) for scope and results.

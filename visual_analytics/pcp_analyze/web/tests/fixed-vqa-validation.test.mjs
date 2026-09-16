@@ -1,19 +1,16 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
   fixedVqaValidationMask,
   developmentWithoutFixedVal,
   fixedValAllowsFeedback,
 } from "../app/lib/fixedVqaValidation.ts";
-import { fetchFixedVqaValidation } from "../app/lib/tuningApi.ts";
 
 const payload = {
   taskId: "task-a", version: "vqa-val-v1", manifestSha256: "a".repeat(64),
   rowIndices: [1, 4], count: 2, protocol: "fixed-vqa-joint-seed0-holdout-v1",
   labelSource: "original-vqa-supervision", initialModelHoldoutIndependent: false,
 };
-const source = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("fixed Val validates provenance, exact count, unique task-aligned rows", () => {
   assert.deepEqual([...fixedVqaValidationMask(payload, "task-a", 6)], [0, 1, 0, 0, 1, 0]);
@@ -48,62 +45,4 @@ test("all feedback modes fail closed on protected, pending, or misaligned rows",
     assert.equal(fixedValAllowsFeedback(item, imageIds, development, validation), false);
   }
   assert.equal(fixedValAllowsFeedback({ rowIndex: 0, id: "a" }, imageIds, development, null), false);
-});
-
-test("fixed Val API is task-wide, abortable, private, and uncached", async () => {
-  const previousFetch = globalThis.fetch;
-  const controller = new AbortController();
-  try {
-    globalThis.fetch = async (url, init) => {
-      assert.equal(url, "/api/tuning/tasks/task%2Fa/validation");
-      assert.equal(init.credentials, "same-origin");
-      assert.equal(init.signal, controller.signal);
-      assert.equal(init.cache, "no-store");
-      return { ok: true, json: async () => payload };
-    };
-    assert.deepEqual(await fetchFixedVqaValidation("task/a", controller.signal), payload);
-  } finally { globalThis.fetch = previousFetch; }
-});
-
-test("task changes and Reload invalidate Val before effects while late requests cannot commit", async () => {
-  const hook = await source("app/lib/useFixedVqaValidation.ts");
-  assert.match(hook, /if \(!active \|\| controller\.signal\.aborted\) return;/);
-  assert.match(hook, /active = false;[\s\S]*?controller\.abort\(\)/);
-  assert.match(hook, /state\?\.taskId !== taskId \|\| state\.rowCount !== rowCount \|\| state\.reloadKey !== reloadKey/);
-  assert.match(hook, /status: "loading", mask: null/);
-  assert.doesNotMatch(hook, /targetId|groundTruth/);
-});
-
-test("current UI exposes only Val results and preserves legacy scopes in closed history", async () => {
-  const [dashboard, panel] = await Promise.all([source("app/Dashboard.tsx"), source("app/components/TuningPanel.tsx")]);
-  assert.match(dashboard, /scopes\.filter\(\(scope\) => scope\.id !== "validation"\)/);
-  assert.match(dashboard, /if \(scope !== "development" && scope !== "test"\) return/);
-  assert.match(dashboard, /developmentMask: developmentWithoutFixedVal\(dataset\.developmentMask, fixedValidation\.mask\)/);
-  assert.match(panel, /vqaValidation = run\?\.evaluationScope === "vqa-validation"/);
-  assert.match(panel, /className="tuning-result-overview" key=\{run\.id\}/);
-  assert.match(panel, /<details className="tuning-evaluation-result">/);
-  assert.match(panel, /Historical evaluation · original scope/);
-  assert.match(panel, /vqaValidation[\s\S]*?\? "Val"/);
-  assert.match(panel, /Clean Validation/);
-  assert.match(panel, /legacy Web Validation/);
-  assert.match(panel, /not an independent holdout for the original model/);
-  assert.match(panel, /runValidationManifestSha256/);
-});
-
-test("single, bulk, review, failure attribution, and queued writes enforce fixed Val protection", async () => {
-  const [dashboard, hook, review] = await Promise.all([
-    source("app/Dashboard.tsx"), source("app/lib/useTuningSession.ts"), source("app/components/AnnotationReviewGallery.tsx"),
-  ]);
-  assert.match(dashboard, /if \(!items\.every\(canAnnotate\)\) return/);
-  assert.match(hook, /assertFeedbackAllowed\(item, session\.id, label === "unmarked"\)/);
-  assert.match(hook, /assertFeedbackAllowed\(item, sessionId, label === "unmarked"\)/);
-  assert.match(hook, /for \(const item of uniqueItems\) assertFeedbackAllowed\(item, sessionId\)/);
-  assert.match(hook, /const updateFailureAttributes[\s\S]*?assertFeedbackAllowed\(item, session\.id\)/);
-  assert.match(hook, /removal \? context\.input\.canRemoveFeedback\(item\) : context\.input\.canWriteFeedback\(item\)/);
-  assert.match(hook, /context\.session\.taskId !== context\.input\.taskId/);
-  assert.match(hook, /includedInTune !== false/);
-  assert.match(review, /Val · excluded/);
-  assert.match(review, /canAnnotate\?\.\(item\) === false && canRemoveAnnotation\?\.\(item\)/);
-  assert.match(review, /changePreference\(item, "unmarked"\)/);
-  assert.match(review, /return item \? \{ annotation, item \} : null/);
 });

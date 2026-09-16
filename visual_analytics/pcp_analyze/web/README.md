@@ -24,6 +24,9 @@ npm run build
 
 These checks do not require a gallery. With the prepared Web assets installed,
 run `npm run test:assets` for Main17 binary, identity and query alignment checks.
+The retained core tests cover fusion/feedback numerics, frozen Val and gates,
+probe snapshots, the update/refinement workflow, and Development/Frozen Test
+metric separation. See [validation](../../../docs/validation.md) for results.
 
 The paper uses `weight_staged` with frozen probes/gates. New feedback stays in
 runtime. Historical sessions and derived models are excluded from publication.

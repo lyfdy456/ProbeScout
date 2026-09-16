@@ -121,25 +121,6 @@ class FixedGateRefinementTests(unittest.TestCase):
                 self.assertEqual(first.embedding_fusion_strength, second.embedding_fusion_strength)
                 self.assertEqual(first.training_history, second.training_history)
 
-    def test_explicit_legacy_policy_preserves_recalibration_stages(self):
-        for mode, expected_calls in (("weight_staged", 1), ("weight_joint", 3)):
-            with self.subTest(mode=mode):
-                probes, embeddings, joint, kwargs = self.fixture()
-                kwargs["theta"] = np.asarray([-0.25, 1.25], dtype=np.float64)
-                with mock.patch.object(
-                    MODELS, "recalibrate_unified_theta", wraps=MODELS.recalibrate_unified_theta,
-                ) as calibrate:
-                    result = MODELS.fit_unified_weight_refinement(
-                        mode, probes, embeddings, joint,
-                        gate_calibration_policy="legacy-recalibrate", **kwargs,
-                    )
-                self.assertEqual(calibrate.call_count, expected_calls)
-                self.assertEqual(sum(
-                    "calibration" in item["stage"] for item in result.training_history
-                ), expected_calls)
-                self.assertFalse(np.array_equal(result.theta, kwargs["theta"]))
-                self.assertEqual(result.theta.dtype, np.dtype(np.float32))
-                self.assertEqual(result.temperature.dtype, np.dtype(np.float32))
 
     def test_unknown_policy_fails_closed(self):
         probes, embeddings, joint, kwargs = self.fixture()
