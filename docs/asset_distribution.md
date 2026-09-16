@@ -25,3 +25,7 @@ Every downloadable file should identify its relative path, bytes, SHA-256, artif
 ## First-preview boundary
 
 The original fixed-VQA Validation documents contain historical feedback exposure rows and overlap statistics. Those legacy documents are excluded from the first evidence package. A separate portable label export retains original VQA source/fit/Validation labels and memberships without feedback history. It does not yet replace the legacy interactive Validation loader. The prepared package has been checked with the frozen offline evaluation commands: all 204 Table 2 rows and 68 Table 5 rows match the prior verified results.
+
+## Verified model snapshot
+
+The private model package is fully uploaded and its remote hashes have been verified: `Ian100/ProbeScout-probes`, revision `3d8fbdcc9921c0a3a20e2c8cbd0cd102b124d904` (2,199 files including metadata, 5,694,587,019 bytes). It includes all 1,520 checkpoints and 304 score caches. Global feature arrays and indexes have been uploaded; patch features are incomplete. The upload endpoint rejected the 60.99 GB CelebA file because its per-file limit is 50 GB, so it is being uploaded as byte-range shards with an exact reconstruction script.

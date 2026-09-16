@@ -26,9 +26,12 @@
       "initial-fusion-evidence"
     ],
     "visibility": "private",
-    "upload_status": "in-progress; verify completed revisions before downloading",
+    "upload_status": "probes verified; global features uploaded; patch features require shard upload",
     "evidence_repository_id": null,
-    "evidence_upload_status": "prepared; additional-data authorization pending"
+    "evidence_upload_status": "prepared; additional-data authorization pending",
+    "verified_revisions": {
+      "Ian100/ProbeScout-probes": "3d8fbdcc9921c0a3a20e2c8cbd0cd102b124d904"
+    }
   },
   "excluded_artifact_types": [
     "human-feedback-annotation",
