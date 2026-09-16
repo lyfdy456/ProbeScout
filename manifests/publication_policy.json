@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "ProbeScout",
-  "status": "local-source-prepared-assets-not-uploaded",
+  "status": "private-asset-preview-upload-in-progress",
   "github": {
     "purpose": "source-configurations-manifests",
     "large_binary_assets": false,
@@ -9,8 +9,10 @@
   },
   "hugging_face": {
     "purpose": "pretrained-probes-features-frozen-initial-evidence",
-    "model_repository_id": null,
-    "dataset_repository_ids": [],
+    "model_repository_id": "Ian100/ProbeScout-probes",
+    "dataset_repository_ids": [
+      "Ian100/ProbeScout-features"
+    ],
     "revision": null,
     "human_feedback_data": false,
     "allowed_artifact_types": [
@@ -22,7 +24,11 @@
       "original-vqa-training-supervision",
       "frozen-evaluation-split",
       "initial-fusion-evidence"
-    ]
+    ],
+    "visibility": "private",
+    "upload_status": "in-progress; verify completed revisions before downloading",
+    "evidence_repository_id": null,
+    "evidence_upload_status": "prepared; additional-data authorization pending"
   },
   "excluded_artifact_types": [
     "human-feedback-annotation",
@@ -36,8 +42,18 @@
   "feedback_algorithm_source": "included",
   "paper_initial_version": "f0-val-36-20260908",
   "download_manifest_requires": [
-    "artifact_id", "artifact_type", "relative_path", "size_bytes", "sha256",
-    "dataset_id", "image_ids_sha256", "source_provenance", "dependencies",
-    "repo_type", "repo_id", "revision", "license"
+    "artifact_id",
+    "artifact_type",
+    "relative_path",
+    "size_bytes",
+    "sha256",
+    "dataset_id",
+    "image_ids_sha256",
+    "source_provenance",
+    "dependencies",
+    "repo_type",
+    "repo_id",
+    "revision",
+    "license"
   ]
 }

@@ -69,9 +69,12 @@ configurations were removed. Numerical and provenance checks remain.
 
 ## Publication status
 
-Features, trained probes, scores and gallery files are separate assets intended
-for Hugging Face. Hosting repositories/revisions have not yet been published;
-the source repository alone does not contain a gallery demo.
+Features and trained probes are being uploaded to private Hugging Face review
+repositories; see [asset distribution](docs/asset_distribution.md) for links and
+status. Completed revisions are not yet available. The source repository alone
+does not contain a gallery demo. The prepared evaluation package also excludes
+legacy Validation documents containing historical feedback exposure; its portable
+VQA labels still require an import adaptation for the interactive workflow.
 
 Historical human feedback, sessions, feedback-derived models and case replay are
 excluded. The feedback algorithm/interface remain available for new input.

@@ -1,8 +1,8 @@
 # Prepare assets
 
-Hosting repositories have not yet been published. These paths define a prepared
-package; a fresh clone does not contain the assets. See
-[asset_distribution.md](asset_distribution.md) for sizes and hosting plans.
+Private asset uploads are in progress; a fresh clone does not contain the assets.
+See [asset_distribution.md](asset_distribution.md) for repository links, upload
+status, package sizes and the first-preview Validation import limitation.
 
 ## Features and task metadata
 
