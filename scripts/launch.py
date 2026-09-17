@@ -20,6 +20,8 @@ from urllib.request import Request, urlopen
 import webbrowser
 import zipfile
 
+from dataset_archives import archive_parts, import_images
+
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "visual_analytics/pcp_analyze/web"
 LOCAL = ROOT / ".probescout"
@@ -124,7 +126,9 @@ class Installer:
         self.verified = read(LOCAL / "verified.json", {})
         self.state = {"stage": "idle", "message": "Choose a dataset and its image folder.",
                       "edition": edition, "dataset": self.settings.get("dataset", "cars"),
-                      "imageRoots": self.settings.get("imageRoots", {}), "logs": [], "url": None}
+                      "imageRoots": self.settings.get("imageRoots", {}),
+                      "imageInputs": self.settings.get("imageInputs", {}), "sourceType": "folder",
+                      "logs": [], "url": None}
         self.lock = threading.Lock()
         self.busy = False
         self.no_browser = no_browser
@@ -369,33 +373,82 @@ class Installer:
             time.sleep(.5)
         raise RuntimeError("Web startup timed out. Check the log and retry.")
 
+    def import_archive(self, dataset, archive, destination):
+        self.update("extracting", "Inspecting the image archive and checking disk space…", progress=None)
+        seven = None
+        if str(archive).lower().endswith((".7z", ".7z.001")):
+            pin = self.pins["sevenZip"]
+            seven = LOCAL / "tools/7zr.exe"
+            self.download(pin["url"], seven, pin["sha256"], pin["bytes"])
+        catalog = read(ROOT / "dataset/tasks" / dataset / "catalog.json")
+        expected, queries = None, {}
+        for task in catalog["datasets"][0]["tasks"]:
+            bundle = inside(WEB / "public", task["dataRoot"].lstrip("/"))
+            manifest = read(bundle / "manifest.json")
+            ids = read(inside(bundle, manifest["files"]["imageIds"]["path"]))
+            if expected is not None and ids != expected:
+                raise ValueError("Task packages disagree on image order.")
+            expected = ids
+            for query in manifest["query"]["images"]:
+                if query["imageId"] in queries and queries[query["imageId"]] != query["sha256"]:
+                    raise ValueError("Task packages disagree on query image bytes.")
+                queries[query["imageId"]] = query["sha256"]
+        if not expected:
+            raise ValueError("Task package contains no images.")
+        return import_images(archive, destination, dataset, expected, queries, seven=seven,
+                             progress=lambda value: self.update(progress=value), log=self.log,
+                             cancelled=lambda: self.closing)
+
     def start(self, options):
         dataset, edition = options.get("dataset"), options.get("edition")
         if dataset not in DATASETS or edition not in {"basic", "full"}:
             raise ValueError("Choose a dataset and edition")
-        raw = str(options.get("imageRoot", "")).strip().strip('"')
-        if not raw:
-            raw = str(ROOT / "dataset/raw" / DATASETS[dataset])
-        folder = (ROOT / raw).resolve()
-        if not folder.is_dir():
-            raise ValueError(f"Image folder does not exist: {folder}")
-        sample = {"cars": "000001.jpg", "hico": "train2015/HICO_train2015_00000001.jpg", "celeba": "000001.jpg"}[dataset]
-        if not (folder / sample).is_file():
-            raise ValueError(f"Select the folder containing {sample}. See the image layout below.")
+        source_type = options.get("sourceType", "folder")
+        if source_type not in {"folder", "archive"}:
+            raise ValueError("Choose an image folder or archive.")
+        selection = {"sourceType": source_type}
+        folder = None
+        if source_type == "archive":
+            raw = str(options.get("archivePath", "")).strip().strip('"')
+            archive = (ROOT / raw).resolve()
+            archive_parts(archive)
+            destination = (ROOT / (str(options.get("extractTo", "")).strip().strip('"') or "dataset/imported")).resolve()
+            if destination.exists() and not destination.is_dir():
+                raise ValueError("Choose a folder for extracted images.")
+            selection.update(archivePath=str(archive), extractTo=str(destination))
+        else:
+            raw = str(options.get("imageRoot", "")).strip().strip('"') or str(ROOT / "dataset/raw" / DATASETS[dataset])
+            folder = (ROOT / raw).resolve()
+            if not folder.is_dir():
+                raise ValueError(f"Image folder does not exist: {folder}")
+            sample = {"cars": "000001.jpg", "hico": "train2015/HICO_train2015_00000001.jpg", "celeba": "000001.jpg"}[dataset]
+            if not (folder / sample).is_file():
+                raise ValueError(f"Select the folder containing {sample}. See the image layout below.")
+            selection["imageRoot"] = str(folder)
         with self.lock:
             if self.busy:
                 raise ValueError("Setup is already running")
             self.busy = True
             self.state.update(stage="environment", message="Preparing…", url=None, logs=[])
-        roots = {**self.settings.get("imageRoots", {}), dataset: str(folder)}
-        self.settings.update(dataset=dataset, edition=edition, imageRoots=roots)
+        roots = {**self.settings.get("imageRoots", {})}
+        if folder is not None:
+            roots[dataset] = str(folder)
+        inputs = {**self.settings.get("imageInputs", {}), dataset: selection}
+        self.settings.update(dataset=dataset, edition=edition, imageRoots=roots, imageInputs=inputs)
         write(LOCAL / "settings.json", self.settings)
-        self.update(edition=edition, dataset=dataset, imageRoots=roots)
+        self.update(edition=edition, dataset=dataset, imageRoots=roots, imageInputs=inputs, sourceType=source_type)
         def install():
             try:
                 self.stop_children()
                 self.dependencies(edition)
                 self.install_task(dataset)
+                if source_type == "archive":
+                    imported = self.import_archive(dataset, archive, destination)
+                    roots[dataset] = str(imported)
+                    inputs[dataset] = {**selection, "sourceType": "folder", "imageRoot": str(imported)}
+                    self.settings.update(imageRoots=roots, imageInputs=inputs)
+                    write(LOCAL / "settings.json", self.settings)
+                    self.update(imageRoots=roots, imageInputs=inputs)
                 self.update("images", "Checking original images and building thumbnails…", progress=None)
                 self.run([self.python, ROOT / "scripts/prepare_web.py", "--dataset", dataset])
                 if edition == "full":
@@ -459,15 +512,24 @@ def make_handler(installer, token):
                 if self.path == "/start":
                     installer.start(data)
                     self.reply(202, {"ok": True})
-                elif self.path == "/folder" and os.name == "nt":
+                elif self.path in {"/folder", "/archive"} and os.name == "nt":
                     # A user-clicked folder picker; no paths are interpolated into shell code.
-                    result = subprocess.run(["powershell.exe", "-NoProfile", "-STA", "-Command",
-                        "Add-Type -AssemblyName System.Windows.Forms; "
+                    choose_archive = self.path == "/archive"
+                    picker = (
+                        "$picker = New-Object System.Windows.Forms.OpenFileDialog; "
+                        "$picker.Title = 'Select the downloaded image archive'; "
+                        "$picker.Filter = 'Image archives|*.zip;*.tar;*.tgz;*.tar.gz;*.tar.bz2;*.tar.xz;*.7z;*.7z.001'; "
+                        "$picker.CheckFileExists = $true; "
+                        if choose_archive else
                         "$picker = New-Object System.Windows.Forms.FolderBrowserDialog; "
-                        "$picker.Description = 'Select the original dataset image folder'; "
-                        "$picker.ShowNewFolderButton = $false; "
+                        "$picker.Description = 'Select an image folder or extraction destination'; "
+                        "$picker.ShowNewFolderButton = $true; "
+                    )
+                    selected = "$picker.FileName" if choose_archive else "$picker.SelectedPath"
+                    result = subprocess.run(["powershell.exe", "-NoProfile", "-STA", "-Command",
+                        "Add-Type -AssemblyName System.Windows.Forms; " + picker +
                         "if ($picker.ShowDialog() -eq 'OK') { "
-                        "[Console]::OutputEncoding = [Text.Encoding]::UTF8; $picker.SelectedPath }"],
+                        "[Console]::OutputEncoding = [Text.Encoding]::UTF8; " + selected + " }"],
                         capture_output=True, text=True, encoding="utf-8-sig", errors="replace",
                         creationflags=subprocess.CREATE_NO_WINDOW)
                     self.reply(200, {"path": result.stdout.strip()})
@@ -509,8 +571,10 @@ def main():
         webbrowser.open(endpoint)
     if installer.settings.get("edition") == args.edition and not args.configure:
         try:
-            installer.start({"dataset": installer.settings["dataset"], "edition": args.edition,
-                             "imageRoot": installer.settings["imageRoots"][installer.settings["dataset"]]})
+            dataset = installer.settings["dataset"]
+            selection = installer.settings.get("imageInputs", {}).get(dataset, {
+                "sourceType": "folder", "imageRoot": installer.settings.get("imageRoots", {}).get(dataset, "")})
+            installer.start({**selection, "dataset": dataset, "edition": args.edition})
         except ValueError as error:
             installer.update("error", str(error))
     try:

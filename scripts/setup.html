@@ -10,7 +10,7 @@ header{display:flex;align-items:center;gap:12px;margin-bottom:40px}.mark{backgro
 </style>
 <main>
 <header><div class="mark" aria-hidden="true">P</div><div><strong>ProbeScout</strong><br><span>Local workspace</span></div></header>
-<div class="intro"><h1>Your images. Ready to explore.</h1><p>Choose a dataset and point to its original images. ProbeScout prepares the environment and opens your visual workspace.</p></div>
+<div class="intro"><h1>Your images. Ready to explore.</h1><p>Choose a dataset and its downloaded archive or image folder. ProbeScout prepares the images and opens your visual workspace.</p></div>
 <div class="grid">
 <section class="panel"><h2>1. Choose your installation</h2>
 <form id="setup">
@@ -19,9 +19,15 @@ header{display:flex;align-items:center;gap:12px;margin-bottom:40px}.mark{backgro
 <label class="profile"><input type="radio" name="edition" value="full"><strong>Full</strong><p>Task package, features and trained probes for the selected dataset. Ready for further experiments.</p></label>
 </div>
 <label class="field" for="dataset">Dataset</label><select id="dataset"><option value="cars">Stanford Cars · 7 tasks</option><option value="hico">HICO-DET · 8 tasks</option><option value="celeba">CelebA · 2 tasks</option></select>
-<label class="field" for="imageRoot">Original image folder</label><div class="path"><input id="imageRoot" type="text" placeholder="Select or paste a folder path" autocomplete="off" spellcheck="false"><button type="button" id="browse" class="secondary">Browse…</button></div>
+<label class="field" for="sourceType">Original images</label><select id="sourceType"><option value="folder">Already extracted — use an image folder</option><option value="archive">Downloaded archive — extract automatically</option></select>
+<div id="folderFields"><label class="field" for="imageRoot">Image folder</label><div class="path"><input id="imageRoot" type="text" placeholder="Select or paste a folder path" autocomplete="off" spellcheck="false"><button type="button" id="browse" class="secondary">Browse…</button></div></div>
+<div id="archiveFields" hidden>
+<label class="field" for="archivePath">Downloaded image archive</label><div class="path"><input id="archivePath" type="text" placeholder="ZIP, TAR, TGZ, 7z or .7z.001" autocomplete="off" spellcheck="false"><button type="button" id="browseArchive" class="secondary">Browse…</button></div>
+<label class="field" for="extractTo">Extract into</label><div class="path"><input id="extractTo" type="text" placeholder="dataset/imported (or choose another drive)" autocomplete="off" spellcheck="false"><button type="button" id="browseDestination" class="secondary">Browse…</button></div>
+<p class="hint">A dataset subfolder is created here. Space is checked before extraction; completed images are reused on retry.</p>
+</div>
 <p class="hint" id="layout"></p>
-<p class="hint">Images stay in this folder. <a href="https://github.com/lyfdy456/ProbeScout/blob/codex/initial-source/docs/manual_setup.md#3-place-original-images-for-image-galleries" target="_blank" rel="noreferrer">Dataset download &amp; layout guide ↗</a></p>
+<p class="hint"><a href="https://github.com/lyfdy456/ProbeScout/blob/codex/initial-source/docs/manual_setup.md#3-place-original-images-for-image-galleries" target="_blank" rel="noreferrer">Dataset download &amp; layout guide ↗</a></p>
 <div class="estimate" id="estimate"></div>
 <div class="actions"><button id="start" type="submit">Prepare &amp; open</button><a id="open" class="button" hidden>Open ProbeScout ↗</a></div>
 <div class="error" id="error" role="alert" hidden></div>
@@ -29,7 +35,7 @@ header{display:flex;align-items:center;gap:12px;margin-bottom:40px}.mark{backgro
 <p class="footer">You can switch datasets or upgrade to Full here later. Downloaded assets are reused.</p>
 </section>
 <section class="panel" aria-live="polite"><h2>2. Prepare your workspace</h2>
-<ol class="stages"><li data-stage="environment"><span class="dot">1</span>Install local dependencies</li><li data-stage="tasks"><span class="dot">2</span>Download task package</li><li data-stage="images"><span class="dot">3</span>Check images &amp; build thumbnails</li><li data-stage="features"><span class="dot">4</span>Download features &amp; probes <small>(Full)</small></li><li data-stage="starting"><span class="dot">5</span>Start the Web interface</li></ol>
+<ol class="stages"><li data-stage="environment"><span class="dot">1</span>Install local dependencies</li><li data-stage="tasks"><span class="dot">2</span>Download task package</li><li data-stage="extracting" hidden><span class="dot">3</span>Extract original images</li><li data-stage="images"><span class="dot">4</span>Check images &amp; build thumbnails</li><li data-stage="features"><span class="dot">5</span>Download features &amp; probes <small>(Full)</small></li><li data-stage="starting"><span class="dot">6</span>Start the Web interface</li></ol>
 <p id="message">Waiting for your selection.</p><progress id="progress" hidden></progress><p id="transfer"></p>
 <details id="details"><summary>Installation log</summary><pre id="logs"></pre></details>
 <p class="footer">First launch needs internet access. Keep the launcher window open while using ProbeScout. Ctrl+C stops the local services.</p>
@@ -40,7 +46,7 @@ const token = location.hash.slice(1) || sessionStorage.getItem('setupToken') || 
 sessionStorage.setItem('setupToken', token);
 history.replaceState(null, '', location.pathname);
 const $ = id => document.getElementById(id);
-let first = true, roots = {}, serverEdition = 'basic', polling = false;
+let first = true, roots = {}, inputs = {}, serverEdition = 'basic', polling = false;
 const info = {
   cars: {size: '94 MB', full: '7.16 GB', space: 'about 12 GB', path: 'dataset/raw/stanford_cars/images', hint: 'Use car_ims images: 000001.jpg … 016185.jpg. Select the folder containing these files.'},
   hico: {size: '320 MB', full: '17.38 GB', space: 'about 23 GB', path: 'dataset/raw/HICO/images', hint: 'Select images/, containing train2015/ and test2015/ from HICO-DET.'},
@@ -49,9 +55,25 @@ const info = {
 function describe() {
   const data = info[$('dataset').value];
   const full = document.querySelector('[name=edition]:checked').value === 'full';
-  $('layout').textContent = data.hint;
+  const archive = $('sourceType').value === 'archive';
+  $('folderFields').hidden = archive;
+  $('archiveFields').hidden = !archive;
+  const archiveHints = {
+    cars: 'Choose the original car_ims.tgz (or a ZIP/TAR mirror with the same six-digit image names).',
+    hico: 'Choose the HICO-DET archive containing images/train2015 and images/test2015.',
+    celeba: 'Choose the In-The-Wild img_celeba archive. For split 7z, keep all parts together and select .7z.001.'
+  };
+  $('layout').textContent = archive ? archiveHints[$('dataset').value] : data.hint;
   $('estimate').textContent = full ? `Assets: ${data.full}. Allow ${data.space} of free space, excluding original images. Includes a CPU environment; CUDA setup is available in the manual guide.` : `Task download: ${data.size}. Allow about 5 GB for the environment, tasks and thumbnails, excluding original images. Large feature and probe caches are not downloaded.`;
   $('imageRoot').placeholder = data.path;
+}
+function restoreInput() {
+  const saved = inputs[$('dataset').value] || {};
+  $('sourceType').value = saved.sourceType || (roots[$('dataset').value] ? 'folder' : 'archive');
+  $('imageRoot').value = roots[$('dataset').value] || saved.imageRoot || '';
+  $('archivePath').value = saved.archivePath || '';
+  $('extractTo').value = saved.extractTo || '';
+  describe();
 }
 async function api(path, body) {
   const response = await fetch(path, {method: body ? 'POST' : 'GET', headers: {'X-Setup-Token': token, 'Content-Type': 'application/json'}, ...(body ? {body: JSON.stringify(body)} : {})});
@@ -60,17 +82,23 @@ async function api(path, body) {
   return data;
 }
 function error(message) { $('error').textContent = message; $('error').hidden = !message; }
-$('dataset').onchange = () => { $('imageRoot').value = roots[$('dataset').value] || ''; describe(); };
+$('dataset').onchange = restoreInput;
+$('sourceType').onchange = describe;
 document.querySelectorAll('[name=edition]').forEach(input => input.onchange = describe);
-$('browse').onclick = async () => {
-  $('browse').disabled = true;
-  try { const data = await api('/folder', {}); if (data.path) $('imageRoot').value = data.path; }
+async function browse(button, field, endpoint) {
+  $(button).disabled = true;
+  try { const data = await api(endpoint, {}); if (data.path) $(field).value = data.path; }
   catch (e) { error(e.message + ' You can paste the path instead.'); }
-  finally { $('browse').disabled = false; }
-};
+  finally { $(button).disabled = false; }
+}
+$('browse').onclick = () => browse('browse', 'imageRoot', '/folder');
+$('browseArchive').onclick = () => browse('browseArchive', 'archivePath', '/archive');
+$('browseDestination').onclick = () => browse('browseDestination', 'extractTo', '/folder');
 $('setup').onsubmit = async event => {
   event.preventDefault(); error(''); $('start').disabled = true;
-  try { await api('/start', {dataset: $('dataset').value, edition: document.querySelector('[name=edition]:checked').value, imageRoot: $('imageRoot').value}); }
+  try { await api('/start', {dataset: $('dataset').value, edition: document.querySelector('[name=edition]:checked').value,
+    sourceType: $('sourceType').value, imageRoot: $('imageRoot').value,
+    archivePath: $('archivePath').value, extractTo: $('extractTo').value}); }
   catch (e) { error(e.message); }
   finally { await poll(); }
 };
@@ -80,8 +108,9 @@ async function poll() {
   try {
     const state = await api('/status');
     roots = state.imageRoots;
+    inputs = state.imageInputs || {};
     if (first) {
-      first = false; $('dataset').value = state.dataset; $('imageRoot').value = roots[state.dataset] || '';
+      first = false; $('dataset').value = state.dataset; restoreInput();
       document.querySelector(`[name=edition][value=${state.edition}]`).checked = true; describe();
     }
     serverEdition = state.edition;
@@ -95,12 +124,19 @@ async function poll() {
     $('progress').hidden = !progress || !state.busy;
     if (progress) { $('progress').max = progress.total || 1; $('progress').value = progress.bytes; }
     $('transfer').textContent = progress && state.busy ? `${progress.file}: ${(progress.bytes / 1e6).toFixed(1)} / ${(progress.total / 1e6).toFixed(1)} MB` : '';
-    const stage = ['environment','tasks','images','features','probes','starting','ready'].indexOf(state.stage);
+    if (progress && state.busy && progress.unit) {
+      $('transfer').textContent = progress.unit === 'percent' ? progress.file + ': ' + progress.bytes + '%' :
+        progress.file + ': ' + progress.bytes + ' / ' + progress.total + ' images';
+    }
+    const order = ['environment','tasks','extracting','images','features','probes','starting','ready'];
+    const stage = order.indexOf(state.stage);
+    let number = 0;
     document.querySelectorAll('[data-stage]').forEach(item => {
-      const index = ['environment','tasks','images','features','probes','starting','ready'].indexOf(item.dataset.stage);
-      item.className = stage === index || (state.stage === 'probes' && index === 3) ? 'active' : stage > index ? 'done' : '';
-      item.hidden = item.dataset.stage === 'features' && serverEdition !== 'full';
-      if (item.dataset.stage === 'starting') item.querySelector('.dot').textContent = serverEdition === 'full' ? '5' : '4';
+      const index = order.indexOf(item.dataset.stage);
+      item.className = stage === index || (state.stage === 'probes' && item.dataset.stage === 'features') ? 'active' : stage > index ? 'done' : '';
+      item.hidden = (item.dataset.stage === 'features' && serverEdition !== 'full') ||
+        (item.dataset.stage === 'extracting' && state.sourceType !== 'archive');
+      if (!item.hidden) item.querySelector('.dot').textContent = String(++number);
     });
   } catch (e) { error(`Cannot reach the launcher. Keep its window open or run start.bat again. ${e.message}`); }
   finally { polling = false; }

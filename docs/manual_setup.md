@@ -43,6 +43,9 @@ a fresh release clone.
 
 ## 3. Place original images for image galleries
 
+The [one-click launcher](launcher.md) can extract the original image archive and
+recognize these paths automatically. The layout below is for manual preparation.
+
 Download the matching original dataset and arrange its images as follows:
 
 ```text

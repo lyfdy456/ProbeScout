@@ -7,7 +7,7 @@
 | Probe learning | 38 tests passed |
 | Web backend | 88 tests passed |
 | Frontend | 37 tests passed |
-| Local launcher | 9 tests passed: asset selection, resume/retry, checksum failures, ZIP boundaries, setup access and shard reconstruction |
+| Local launcher | 17 tests passed: asset selection, download/import recovery, archive layouts and boundaries, disk space, query identity, setup access and shard reconstruction |
 | TypeScript | `tsc --noEmit` passed |
 | Release boundary | Source/configuration, credential fields and exclusions passed |
 
@@ -42,6 +42,19 @@ offline restart and duplicate-launch handling passed.
 HICO/CelebA download selection uses the published dataset manifest entries;
 CelebA reconstruction is covered with a small sharded fixture. Their complete
 downloads and thumbnail preparation were not rerun for this launcher release.
+
+## Automatic original-image extraction
+
+The browser setup imported the original Cars TGZ (1.96 GB compressed), extracted
+all 16,185 images directly to a selected destination (1.85 GiB of pictures),
+checked the 7-task catalog and opened the gallery with working full-size images.
+No intermediate TAR or second extracted image tree was created.
+
+ZIP/TGZ wrapper removal, HICO train/test layout, interrupted-import reuse, query
+image mismatches, low disk space and unsafe archive entries are covered by tests.
+The split-7z test used the real pinned 7-Zip executable, including Unicode paths
+and a missing-volume failure. Complete HICO/CelebA original archives were not
+extracted in this validation.
 
 ## Earlier release checks
 

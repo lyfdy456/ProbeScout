@@ -10,19 +10,20 @@ On **Windows x64**, download either launcher package and extract it:
 
 | Download | Installed for your selected dataset | From a Git clone |
 |---|---|---|
-| [Starter](https://github.com/lyfdy456/ProbeScout/releases/download/v0.2.0-launcher/ProbeScout-Starter-Windows.zip) | Task package for browsing and Weight Tune / Staged | Double-click `start.bat` |
-| [Full](https://github.com/lyfdy456/ProbeScout/releases/download/v0.2.0-launcher/ProbeScout-Full-Windows.zip) | Task package + features + trained probes | Double-click `start-full.bat` |
+| [Starter](https://github.com/lyfdy456/ProbeScout/releases/download/v0.3.0-archives/ProbeScout-Starter-Windows.zip) | Task package for browsing and Weight Tune / Staged | Double-click `start.bat` |
+| [Full](https://github.com/lyfdy456/ProbeScout/releases/download/v0.3.0-archives/ProbeScout-Full-Windows.zip) | Task package + features + trained probes | Double-click `start-full.bat` |
 
 Both ZIPs contain code and a launcher. The selected assets are downloaded from
 HF on first launch; Full does not download all three datasets.
 
-1. Download and extract the original images for Cars, HICO-DET or CelebA using
-   the [image layout guide](docs/manual_setup.md#3-place-original-images-for-image-galleries).
+1. Download the original image archive for Cars, HICO-DET or CelebA using
+   the [dataset guide](docs/manual_setup.md#3-place-original-images-for-image-galleries).
 2. Double-click `start.bat` in the extracted package.
-3. Choose your dataset and image folder, then click **Prepare & open**.
+3. Choose your dataset, select its image archive and an extraction folder, then
+   click **Prepare & open**. An existing image folder can also be used directly.
 
 The launcher installs Python/Node and a CPU environment locally, downloads the
-assets, builds thumbnails and opens the Web interface. Later launches reuse the
+assets, extracts original images, builds thumbnails and opens the Web interface. Later launches reuse the
 installation. [Setup details and troubleshooting](docs/launcher.md).
 
 **Original images are required for photograph previews.** HF features let you

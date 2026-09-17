@@ -9,6 +9,11 @@
     "directory": "node-v24.11.1-win-x64"
   },
   "python": "3.12.12",
+  "sevenZip": {
+    "url": "https://github.com/ip7z/7zip/releases/download/26.03/7zr.exe",
+    "sha256": "ad4c82fadcbdf93c03b4fc440f300509c7d60c5c2f4d183e35d9d70d6957037d",
+    "bytes": 602624
+  },
   "features": {
     "repoId": "Ian100/ProbeScout-features",
     "repoType": "dataset",

@@ -32,7 +32,7 @@ def main():
                 output.writestr("ProbeScout/EDITION.txt",
                     f"ProbeScout {edition}\nSource: {commit}\n"
                     "Extract this ZIP, then double-click start.bat.\n"
-                    "Select your original image folder. Matching assets download on first launch.\n")
+                    "Select your downloaded image archive or image folder. Matching assets download on first launch.\n")
             results.append({"edition": edition, "file": target.name, "bytes": target.stat().st_size,
                             "sha256": hashlib.sha256(target.read_bytes()).hexdigest()})
     manifest = {"commit": commit, "packages": results, "containsOriginalImages": False,

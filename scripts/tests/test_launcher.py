@@ -5,6 +5,7 @@ import importlib.util
 import json
 from pathlib import Path
 import tempfile
+import sys
 import threading
 import unittest
 from unittest.mock import patch
@@ -12,6 +13,7 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 import zipfile
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 SPEC = importlib.util.spec_from_file_location("launcher", Path(__file__).resolve().parents[1] / "launch.py")
 launcher = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(launcher)
