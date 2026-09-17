@@ -1,7 +1,8 @@
 # Workflow
 
 Commands run from the repository root unless stated otherwise. See
-[assets.md](assets.md) for input layout.
+[manual_setup.md](manual_setup.md) for manual downloads, relative image paths,
+task ZIP extraction and Web launch. Install only the datasets you need.
 
 ## 1. Extract or load frozen features
 
@@ -30,11 +31,14 @@ metadata, features and matching Web task bundles:
 
 ```sh
 python scripts/train_probes.py --list
-uv run --project probe_learning python scripts/train_probes.py --directory /path/to/frozen-val-contracts --task-id 001_cars_task_bmw_convertible
-uv run --project probe_learning python scripts/train_probes.py --directory /path/to/frozen-val-contracts --task-id 001_cars_task_bmw_convertible --execute
+uv run --project probe_learning python scripts/train_probes.py --task-id 001_cars_task_bmw_convertible
+uv run --project probe_learning python scripts/train_probes.py --task-id 001_cars_task_bmw_convertible --execute
 ```
 
-Omit `--task-id` for all Main17 tasks. Default: preflight. With `--execute`, use
+The task ZIP supplies original VQA labels and fixed Val contracts; a separate
+`--directory` is only needed for legacy exports. Prepare the installed catalog
+first. Repeat `--task-id` for a subset; omitting it requires all Main17 tasks.
+Default: preflight. With `--execute`, use
 [paper_training.json](../configs/paper_training.json): eight methods, seeds 0-4,
 100 epochs and fixed-Validation checkpoint selection. Val, Test and query images
 stay out of fitting and the unlabeled pool.
@@ -49,7 +53,7 @@ operations. Its acquisition-budget CLI does not replace fixed-Val paper training
 
 ## 3. Fuse evidence and open the interface
 
-The application loads the pinned initial evidence package:
+The application loads the pinned initial evidence included in the task ZIP:
 
 ```text
 u = weighted mixture of the eight attribute-probe scores
@@ -64,7 +68,9 @@ Read `unified_weight_scores` in
 uniform over probes and holistic methods, with `gamma = 1`, `lambda = 0.25`.
 The final initial gates are selected using original VQA Validation.
 
-Run from `visual_analytics/pcp_analyze/web`:
+First run `uv run --project probe_learning python scripts/prepare_web.py --dataset cars`
+from the repository root (replace the dataset selection as needed). Then run
+from `visual_analytics/pcp_analyze/web`:
 
 ```sh
 npm run dev

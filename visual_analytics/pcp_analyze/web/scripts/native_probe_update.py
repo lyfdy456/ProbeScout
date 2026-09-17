@@ -145,8 +145,9 @@ def resolve_bank(service: Any, task_id: str, base: Any) -> dict:
     # This immutable publication attestation binds phi0 to its probabilities;
     # a changed checkpoint may not be accepted merely by recomputing its hash.
     pinned_files = [*metadata_paths, *checkpoints, *score_paths]
-    pinned_hashes = {str(path.relative_to(directory)): file_sha(path) for path in pinned_files}
-    if link.get("files") != pinned_hashes:
+    pinned_hashes = {path.relative_to(directory).as_posix(): file_sha(path) for path in pinned_files}
+    published_hashes = {name.replace("\\", "/"): value for name, value in link.get("files", {}).items()}
+    if len(published_hashes) != len(link.get("files", {})) or published_hashes != pinned_hashes:
         raise RuntimeError("Native Probe published checkpoint/score checksum mismatch")
     attr_names = tuple(attr["name"] for attr in contract["attributes"])
     if attr_names != base.attribute_names or tuple(attr["id"] for attr in contract["attributes"]) != base.attribute_ids:
@@ -194,6 +195,11 @@ def resolve_bank(service: Any, task_id: str, base: Any) -> dict:
 
 def capability(service: Any, task_id: str) -> dict:
     try:
+        import portable_tasks
+        if portable_tasks.available(service, task_id):
+            adapter = service._source_adapter(task_id)
+            if not adapter.emb_path.is_file() or not adapter.patch_path.is_file():
+                return {"available": False, "reason": "Update Probes requires this dataset's SigLIP global and patch features; download from ProbeScout-features or extract them locally."}
         _bank_directory(service, task_id)  # Missing prerequisites stay cheap.
         base = service._refinement_base_context(task_id)
         bank = resolve_bank(service, task_id, base)
@@ -329,8 +335,8 @@ def run_native_updates(service: Any, request: dict, bank: dict, output: Path) ->
     contract = bank["contract"]
     # These helpers mutate harness globals; source loading uses the same lock.
     with service._weighted_fusion_context_guard:
-        harness.configure(task.dataset_id, task.task_name)
         adapter = context.adapter
+        harness.configure(task.dataset_id, task.task_name, adapter=adapter)
         if bank_api.database_paths(adapter) != bank["offlineImageIds"]:
             raise RuntimeError("Native Probe feature/gallery image order mismatch")
         emb, _ = harness.load_backbone_embeddings(adapter, "siglip")

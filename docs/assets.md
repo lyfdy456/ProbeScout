@@ -1,9 +1,9 @@
 # Prepare assets
 
-The private feature and probe packages are fully uploaded and verified. A fresh
-clone does not contain these assets, and the separate Web/evaluation package
-has not been uploaded. See [asset_distribution.md](asset_distribution.md) for
-download links, pinned revisions, sizes and the interactive Validation limitation.
+Public task, feature and probe packages are available on HF. A fresh clone has
+source only. Follow [manual_setup.md](manual_setup.md) to install one dataset and
+launch the Web interface; [asset_distribution.md](asset_distribution.md) lists
+download links, pinned revisions and optional feature/model subsets.
 
 ## Features and task metadata
 
@@ -18,7 +18,7 @@ download links, pinned revisions, sizes and the interactive Validation limitatio
 ```
 
 Tasks need attributes, query IDs, original VQA supervision, evaluation splits
-and image identities. Raw images follow the dataset adapters' layout. Preserve
+and image identities. Raw images follow the manual setup layout. Preserve
 record order; arrays and labels are aligned by image ID.
 
 ## Pretrained inference and Web assets
@@ -32,8 +32,11 @@ runtime/unified-initial/active.json
 runtime/unified-initial/<version>/manifest.json
 runtime/unified-initial/<version>/<task-id>/...
 runtime/isolated-probes/<task-id>/<bank-id>/...
-runtime/evaluation/...             # immutable original-VQA Val contracts
 ```
+
+Portable label and partition contracts are rooted at
+`dataset/tasks/<dataset>/<task>/original_vqa.json` and `isolation.json` in the
+repository root, alongside `task.json`, `query_ids.json` and `attributes.txt`.
 
 Some pinned bundles use older relative data-root names recorded in the catalog.
 Preserve those paths and checksums. A version can include `36` while evaluation
@@ -46,7 +49,9 @@ checked. A gate-only F0 change can reuse the attested parent's unchanged CLAY sc
 
 ## Fixed-Validation training
 
-`train_probes.py --directory ...` expects the original contract directory:
+The default `train_probes.py` path uses the portable task ZIP's verified original
+VQA labels and isolation contract. No additional Val download is required.
+The optional legacy `train_probes.py --directory ...` expects a contract directory:
 `manifest.json` plus the numeric task files named by it. These are checked against
 active immutable VQA Val metadata and task sources. This differs from the
 simplified Table 5 index below; features alone do not suffice for paper training.

@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "protocol": "probescout-portable-tasks-v1",
+  "version": "main17-tasks-v1-20260917",
+  "repoId": "Ian100/ProbeScout-tasks",
+  "revision": "f6dd54084ba0352d80ae6d3bb2171380c6ac63bb",
+  "datasets": {
+    "cars": {
+      "archive": "cars.zip",
+      "bytes": 93740508,
+      "sha256": "b640f34d2f6bb4b0877213cc23b9e981f2ca34a446b0ec49896a5982c01c3e50",
+      "manifestSha256": "5673498706c78c4b08682cf606a5a33845764afe4ab64e82c26b1c89530ae085",
+      "tasks": [
+        "001_cars_task_bmw_convertible",
+        "002_cars_task_bmw_sedan",
+        "003_cars_task_ford_mustang_convertible_two_door",
+        "019_cars_task_hyundai_hatchback",
+        "042_cars_task_honda_minivan",
+        "043_cars_task_jeep_suv",
+        "045_cars_task_gmc_van"
+      ],
+      "files": 277
+    },
+    "hico": {
+      "archive": "hico.zip",
+      "bytes": 320294166,
+      "sha256": "590bd02bcb44337d64a144f10ef56c62f710ae0718739cba67726c996208dbbf",
+      "manifestSha256": "7855e13e1321b5dbc35aff941a6672930255ac5903a16e5b39f7cde7228f4cb1",
+      "tasks": [
+        "008_hico_task_bike_jumping",
+        "009_hico_task_bicycle_riding_no_jump",
+        "017_hico_task_hico_shearing_sheep",
+        "018_hico_task_hico_typing_on_keyboard",
+        "020_hico_task_hico_directing_airplane",
+        "031_hico_task_hico_sailing_boat",
+        "033_hico_task_hico_herding_cow",
+        "037_hico_task_hico_reading_book"
+      ],
+      "files": 320
+    },
+    "celeba": {
+      "archive": "celeba.zip",
+      "bytes": 439432539,
+      "sha256": "497fd657be60c79b98849873fa70298ec6e1fa70b0cd4bac17cf6dfc24220f8e",
+      "manifestSha256": "8c54bcbb4abe75884beac0e7039d75f5249343521c9ee8fc7ea6d70c0d1424ff",
+      "tasks": [
+        "006_celeba_task_celeba_gray_hair_eyeglasses_male",
+        "052_celeba_task_celeba_eyeglasses_smiling_necktie"
+      ],
+      "files": 87
+    }
+  }
+}

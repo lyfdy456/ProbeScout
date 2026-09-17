@@ -32,7 +32,7 @@ function decodePathname(value) {
   return decoded.replaceAll("\\", "/").replace(/\/{2,}/g, "/").toLowerCase();
 }
 
-export function isPrivateDevRequest(rawUrl) {
+export function isPrivateDevRequest(rawUrl, publicModuleUrls = []) {
   if (typeof rawUrl !== "string" || rawUrl.length === 0) return false;
   let pathname;
   try {
@@ -42,6 +42,15 @@ export function isPrivateDevRequest(rawUrl) {
   }
   const normalized = decodePathname(pathname);
   if (normalized === null) return true;
+  if (normalized.split("/").some((part) => part === "." || part === "..")) return true;
+  // Vite/Vinext load browser runtime code through absolute module URLs.
+  // Only dependency paths resolved by the config may bypass the /@fs boundary.
+  if (publicModuleUrls.some((url) => {
+    const allowed = decodePathname(url);
+    return allowed !== null && (normalized === allowed || (
+      allowed.endsWith("/") && normalized.startsWith(allowed) && /\.(?:mjs|js)$/.test(normalized)
+    ));
+  })) return false;
   if (normalized.startsWith("/.")) return true;
   if (PRIVATE_ROOT_FILES.has(normalized)) return true;
   if (
@@ -57,13 +66,13 @@ export function isPrivateDevRequest(rawUrl) {
   );
 }
 
-export function privateDevBoundary() {
+export function privateDevBoundary(publicModuleUrls = []) {
   return {
     name: "pcp-private-dev-boundary",
     enforce: "pre",
     configureServer(server) {
       server.middlewares.use((request, response, next) => {
-        if (!isPrivateDevRequest(request.url)) {
+        if (!isPrivateDevRequest(request.url, publicModuleUrls)) {
           next();
           return;
         }

@@ -6,6 +6,8 @@ evidence into a conjunction-aware ranking, and supports interactive refinement.
 
 ## Start here
 
+- [Run one dataset locally](docs/manual_setup.md): manual image layout, task ZIPs,
+  optional HF features, and the commands to open the Web interface.
 - [Workflow](docs/workflow.md): features, training/loading, fusion and feedback.
 - [Paper-to-code map](docs/paper_method.md): eight probes, Main17, Tables 2 and 5.
 - [Assets](docs/assets.md): required inputs, locations and checksums.
@@ -38,7 +40,7 @@ the separate [asset packages](docs/assets.md).
 python scripts/train_probes.py --list
 
 # Check frozen training inputs; add --execute to train.
-uv run --project probe_learning python scripts/train_probes.py --directory /path/to/frozen-val-contracts
+uv run --project probe_learning python scripts/train_probes.py --task-id 001_cars_task_bmw_convertible
 
 # Table 2: two embedding baselines, CLAY, eight probes and initial F0.
 uv run --project probe_learning python scripts/evaluate_main17.py --clay /path/to/clay-cache --output outputs/table2
@@ -47,8 +49,18 @@ uv run --project probe_learning python scripts/evaluate_main17.py --clay /path/t
 uv run --project probe_learning python scripts/evaluate_ablation.py --assets /path/to/evaluation-assets --output outputs/table5
 ```
 
-After installing the Web evidence package, run `npm run dev` from
-`visual_analytics/pcp_analyze/web`.
+After extracting your selected [task ZIP](https://huggingface.co/datasets/Ian100/ProbeScout-tasks)
+into the repository root and placing original images as documented:
+
+```sh
+uv run --project probe_learning python scripts/prepare_web.py --dataset cars
+cd visual_analytics/pcp_analyze/web
+npm run dev
+```
+
+Open http://localhost:3000. Select `cars`, `hico`, `celeba`, or multiple datasets.
+Cached browsing and Weight Tune use the task ZIP; native probe updates require
+the matching features and pretrained banks too.
 
 ## Choose a workflow
 
@@ -62,8 +74,8 @@ After installing the Web evidence package, run `npm run dev` from
 See the [workflow](docs/workflow.md) for the full sequence. The Web interface
 supports a combined development launcher or separate frontend/API processes;
 see [launch options](visual_analytics/pcp_analyze/web/README.md#launch-options).
-These entry points require the assets listed above; the two available HF packages
-do not yet form a complete portable Web demo.
+Original images are required for photograph previews. HF embeddings can replace
+feature extraction, and `prepare_web.py --without-images` enables numerical use.
 
 ## Layout
 
@@ -84,23 +96,25 @@ configurations were removed. Numerical and provenance checks remain.
 
 ## Publication status
 
-Features and trained probes are fully uploaded and verified in private Hugging
-Face repositories:
+Source, tasks, features and trained probes are hosted in public repositories:
 
+- [Tasks and Web evidence](https://huggingface.co/datasets/Ian100/ProbeScout-tasks):
+  separate Cars, HICO and CelebA ZIPs; definitions, original VQA labels, splits,
+  ordered records and initial Web arrays. No original images or thumbnails.
 - [Features](https://huggingface.co/datasets/Ian100/ProbeScout-features): 81.10 GB,
   including global features, patch tokens, records and image IDs.
 - [Probes and prediction caches](https://huggingface.co/Ian100/ProbeScout-probes):
   5.69 GB, including 1,520 checkpoints and 304 frozen score caches.
 
 See [asset distribution](docs/asset_distribution.md) for pinned revisions and
-download commands. Access currently requires an authorized HF account.
-The separate Web/evaluation evidence package has not been uploaded. Its portable
-VQA labels still require adaptation for the interactive Validation loader;
-legacy documents containing historical feedback exposure are excluded.
+download commands. Public downloads do not require account authorization.
+The portable task loader verifies the clean VQA exports against frozen bank
+identities. Separate CLAY/Table 5 reproduction inputs are not included in task ZIPs.
 
 Historical human feedback, sessions, feedback-derived models and case replay are
 excluded. The feedback algorithm/interface remain available for new input.
 Original VQA supervision is a separate training asset.
 
-Run `python scripts/check_release.py` to check the source boundary. Asset hosting,
-licenses and citation metadata remain to be finalized before publication.
+Run `python scripts/check_release.py` to check the source boundary. Original
+dataset terms apply to the corresponding assets; citation metadata remains to
+be finalized.

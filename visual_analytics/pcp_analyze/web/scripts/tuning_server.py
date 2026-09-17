@@ -1698,6 +1698,9 @@ class TuningService:
     @lru_cache(maxsize=3)
     def _source_adapter(self, task_id: str) -> Any:
         """Load only the dataset metadata needed to resolve an original image."""
+        import portable_tasks
+        if portable_tasks.available(self, task_id):
+            return portable_tasks.adapter(self, task_id)
         with self._source_adapter_guard:
             task = self.task(task_id)
             experiment_root = self.web_root.parents[2]
@@ -1765,6 +1768,10 @@ class TuningService:
         """Resolve the frozen train pool without loading learner score tensors."""
 
         import numpy as np
+        import portable_tasks
+        if portable_tasks.available(self, task_id):
+            portable_tasks.validation_split(self, task_id, "joint")
+            return np.asarray(portable_tasks.document(self, task_id)[1]["trainPoolRows"], dtype=np.int64)
 
         context = self._tuning_source_context(task_id)
         pcp_root = self.web_root.parent
@@ -1786,6 +1793,9 @@ class TuningService:
 
     def _original_development_supervision(self, task_id: str, target_id: str) -> Any:
         """Load the audited original labels plus their legacy DG-only view."""
+        import portable_tasks
+        if portable_tasks.available(self, task_id):
+            return portable_tasks.original_supervision(self, task_id, target_id)
         from experimental_parent_overlay import applies, original_supervision
         if applies(task_id):
             return original_supervision(self, task_id, target_id)

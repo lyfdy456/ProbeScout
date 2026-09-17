@@ -130,13 +130,13 @@ STAGE_NAME = {
 
 
 
-def configure(dataset: str, task: str, joint_label: str | None = None):
+def configure(dataset: str, task: str, joint_label: str | None = None, *, adapter=None):
     """Build the dataset adapter and populate task-dependent globals."""
     global ADAPTER, DATASET, TASK, ATTRS, ATTR_KEY, KEYS
     global JOINT_LABEL, STAGE_DIRS, SPLIT_DIR, RANKING_SPEC
     global _CLIP_TEXT_FEATS, _CLIP_PROMPT_ENSEMBLE_FEATS, _CLIP_BINARY_TEXT_FEATS
     global _TEXT_FEATS_BY_BACKBONE, _PROMPT_ENSEMBLE_FEATS_BY_BACKBONE
-    ADAPTER = build_adapter(dataset, task, joint_label)
+    ADAPTER = adapter if adapter is not None else build_adapter(dataset, task, joint_label)
     DATASET = dataset
 
     TASK = task

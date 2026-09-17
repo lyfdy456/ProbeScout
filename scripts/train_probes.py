@@ -41,11 +41,12 @@ def main():
         print(json.dumps({'methods': config['methods'], 'seeds': config['seeds'],
                           'epochs': config['epochs'], 'tasks': [t['task_id'] for t in tasks]}, indent=2))
         return
-    if args.directory is None or not args.directory.is_dir():
-        parser.error('--directory must point to the downloaded frozen Validation contracts')
+    if args.directory is not None and not args.directory.is_dir():
+        parser.error('--directory must point to existing frozen Validation contracts')
     for task in tasks:
-        command = [sys.executable, '-B', str(TRAINER), '--directory', str(args.directory.resolve()),
-                   '--task-id', task['task_id'], '--epochs', str(config['epochs'])]
+        command = [sys.executable, '-B', str(TRAINER), '--task-id', task['task_id'], '--epochs', str(config['epochs'])]
+        if args.directory is not None:
+            command += ['--directory', str(args.directory.resolve())]
         if args.execute:
             command.append('--execute')
         print(f"{task['task_id']}: {'train' if args.execute else 'preflight'}", flush=True)

@@ -1,91 +1,107 @@
 # Asset distribution
 
 GitHub contains source, configuration, dependency locks, paper scope and core
-tests. Large immutable features, checkpoints and prediction caches are hosted
-separately on Hugging Face.
+tests. Hugging Face contains tasks, frozen Web evidence, features and models.
+All three HF repositories are public; download authorization is not required.
 
-## Available packages
-
-Both private packages are fully uploaded. The upload process verified all
-packaged remote file hashes; the pinned revisions were checked again on
-2026-09-17. Sizes below are decimal GB, without compression.
-
-| Package | Contents | Size | Pinned revision |
+| Package | Contents | Size | Immutable identity |
 |---|---|---:|---|
-| [ProbeScout-probes](https://huggingface.co/Ian100/ProbeScout-probes) | 1,520 checkpoints, 304 frozen prediction caches, training and isolation metadata | 5.69 GB | `3d8fbdcc9921c0a3a20e2c8cbd0cd102b124d904` |
-| [ProbeScout-features](https://huggingface.co/datasets/Ian100/ProbeScout-features) | Cars, HICO and CelebA SigLIP global features, patch tokens, records and image IDs | 81.10 GB | `3ef237a82d0c738a159aa49bb86764732d331265` |
+| [ProbeScout-tasks](https://huggingface.co/datasets/Ian100/ProbeScout-tasks) | 3 dataset ZIPs: Main17 definitions, original VQA labels, records, splits, Web arrays and initial F0 | 0.85 GB compressed | [task_packages.json](../manifests/task_packages.json) |
+| [ProbeScout-probes](https://huggingface.co/Ian100/ProbeScout-probes) | 1,520 checkpoints, 304 prediction caches, training/isolation metadata | 5.69 GB | `3d8fbdcc9921c0a3a20e2c8cbd0cd102b124d904` |
+| [ProbeScout-features](https://huggingface.co/datasets/Ian100/ProbeScout-features) | Global SigLIP features, patch tokens, records and image IDs | 81.10 GB | `3ef237a82d0c738a159aa49bb86764732d331265` |
 
-These are private review repositories: an authorized HF account is required.
-Each package includes `asset_manifest.json` with paths, sizes and SHA-256 values.
-The model package has 2,199 packaged files (5,694,587,019 bytes); the feature
-package has 44 (81,101,385,535 bytes). The Hub also adds a `.gitattributes` file
-to each repository, outside those package counts.
+Sizes are decimal. Download only your selected datasets. See
+[manual setup](manual_setup.md) for original image layout, ZIP extraction and
+launch commands. Original photographs are supplied locally by the user.
 
-## Download
+## Download tasks
 
-Use an environment with `huggingface_hub` installed and authenticate locally
-with `hf auth login`. Do not put an access token in source code. From the
-ProbeScout repository root, run the following Python in that environment:
+Use the HF Files tab, or run this Python from the repository root in an
+environment containing `huggingface_hub`. Change `dataset` as desired:
 
 ```python
-from huggingface_hub import snapshot_download
+import json
+from pathlib import Path
+from huggingface_hub import hf_hub_download
 
-snapshot_download(
-    repo_id="Ian100/ProbeScout-probes",
-    repo_type="model",
-    revision="3d8fbdcc9921c0a3a20e2c8cbd0cd102b124d904",
-    local_dir="artifacts/downloads/probes",
-)
-
-# Optional: this downloads the full 81.10 GB feature package.
-snapshot_download(
-    repo_id="Ian100/ProbeScout-features",
-    repo_type="dataset",
-    revision="3ef237a82d0c738a159aa49bb86764732d331265",
-    local_dir="artifacts/downloads/features",
+dataset = "cars"  # cars, hico, or celeba
+index = json.loads(Path("manifests/task_packages.json").read_text())
+hf_hub_download(
+    repo_id=index["repoId"], repo_type="dataset", revision=index["revision"],
+    filename=index["datasets"][dataset]["archive"], local_dir="artifacts/downloads/tasks",
 )
 ```
 
-Merge the downloaded probe package's `visual_analytics/` directory into the code
-root, preserving its internal paths. The feature package has its own
-`dataset/raw/` tree; use it within the prepared `EXPERIMENT_ROOT` described in
-[assets.md](assets.md). Keep the package manifests for verification.
+```sh
+python -m zipfile -e artifacts/downloads/tasks/cars.zip .
+```
 
-To fetch only one dataset, add an `allow_patterns` list to the feature download,
-for example `['dataset/raw/stanford_cars/**', 'asset_manifest.json', 'README.md']`.
-Cached ranking display does not require downloading all patch features; feature
-extraction and probe training/update have their own input requirements.
+`prepare_web.py` verifies every extracted file against the source-pinned manifest
+before enabling the catalog. The ZIP hash is also recorded in the index.
+
+## Download features and probes
+
+These are optional for cached Web browsing/Weight Tune. They are needed for
+native probe updates, and features are needed for training from scratch.
+For a **Cars-only** setup, run from the repository root:
+
+```python
+import json
+from pathlib import Path
+from huggingface_hub import snapshot_download
+
+dataset = "cars"
+folder = {"cars": "stanford_cars", "hico": "HICO", "celeba": "CelebA"}[dataset]
+snapshot_download(
+    repo_id="Ian100/ProbeScout-features", repo_type="dataset",
+    revision="3ef237a82d0c738a159aa49bb86764732d331265",
+    allow_patterns=[f"dataset/raw/{folder}/**", "asset_manifest.json", "restore_patch_features.py"],
+    local_dir="artifacts/downloads/features",
+)
+scope = json.loads(Path("manifests/paper_main17.json").read_text())
+task_ids = [t["task_id"] for t in scope["tasks"] if t["dataset"] == dataset]
+snapshot_download(
+    repo_id="Ian100/ProbeScout-probes", repo_type="model",
+    revision="3d8fbdcc9921c0a3a20e2c8cbd0cd102b124d904",
+    allow_patterns=[f"visual_analytics/pcp_analyze/runtime/isolated-probes/{tid}/**" for tid in task_ids]
+                   + ["asset_manifest.json"],
+    local_dir="artifacts/downloads/probes",
+)
+```
+
+Merge `artifacts/downloads/features/dataset/` into `<repo>/dataset/`, and
+`artifacts/downloads/probes/visual_analytics/` into `<repo>/visual_analytics/`.
+Preserve internal paths, ordered records and metadata. Keep the downloaded
+`asset_manifest.json` files for checking hashes. To select another dataset,
+change `dataset`; to fetch the full packages, omit `allow_patterns`.
 
 The 60.99 GB CelebA patch NPY is stored as 29 byte-range shards. After downloading
-all feature files, reconstruct it with the script included in that HF package:
+the CelebA subset, reconstruct it **before merging the dataset tree**:
 
 ```sh
 python artifacts/downloads/features/restore_patch_features.py --root artifacts/downloads/features
 ```
 
-The script verifies each shard and the reconstructed file. It preserves the
-original NPY bytes, dtype, shape and row order, retains the shards, and refuses
-to overwrite a differing file. Reconstruction needs another 60.99 GB of free
-disk space. Cars and HICO arrays retain their original NPY files.
+The script verifies all shards and the restored NPY, retains the shards and
+refuses to overwrite a differing file. Reconstruction requires another 60.99 GB
+of disk space. Cars and HICO already contain ordinary NPY files.
 
-## Publication selection
+## Task provenance and exclusions
 
-The main17 initial snapshot is `f0-val-36-20260908`. Models are selected by the `bankDirectory` in each frozen task manifest. Avoid directory-wide uploads of the research runtime: that tree also contains mutable user state. The exporter uses an explicit file allowlist and uploads directly from the original files. Large features and checkpoints are not copied into the source repository or a duplicate staging directory.
+The task package loader checks the clean manifest SHA-256, task/record identities,
+original VQA source/fit/Val labels, fingerprints and protected partitions.
+Original Val hashes are explicitly retained as **provenance**, while the clean
+files have their own verified hashes. This preserves compatibility with the
+published probe banks without exporting historical feedback exposure records.
 
-Human feedback is excluded from GitHub **and** Hugging Face: no annotations, user/session databases, labels snapshots, human-refined weights/scores, or case replay bundles. Original VQA supervision for probe training is a separate artifact class; it must not be replaced with later human-edited feedback data.
+The initial F0 version is `f0-val-36-20260908`; Main17 still selects exactly 17
+tasks. Checkpoints remain immutable. A new training run has a new identity and
+does not replace the published initial ranking automatically.
 
-Every downloadable file should identify its relative path, bytes, SHA-256, artifact type, dataset/gallery identity, feature identity, training/split/calibration provenance, dependency IDs, Hugging Face repository type/ID/revision, and license. Keep data paths separate from public source paths; do not change original artifact hashes to match renamed code.
+Historical human annotations, sessions, snapshots, refined models/scores and case
+replay are excluded from both GitHub and HF. Task ZIPs also exclude photographs
+and thumbnails, which are generated locally. Original dataset terms apply.
 
-## What remains for a portable Web system
-
-The separate Main17 Web/evaluation package is prepared locally but has not
-been uploaded; there is no published HF link for it yet. It contains the task
-catalog and bundles, initial fusion evidence, evaluation inputs, original VQA
-labels and query/thumbnail images. Its upload awaits authorization for those
-additional assets. The two available packages above do not supply all of this.
-
-The original fixed-VQA Validation documents contain historical feedback exposure rows and overlap statistics. Those legacy documents are excluded from the first evidence package. A separate portable label export retains original VQA source/fit/Validation labels and memberships without feedback history. It does not yet replace the legacy interactive Validation loader. The prepared package has been checked with the frozen offline evaluation commands: all 204 Table 2 rows and 68 Table 5 rows match the prior verified results.
-
-Uploading the evidence alone would not complete the interactive loader
-adaptation. The two available HF packages do not yet form an asset-complete
-portable Web demo.
+The separate CLAY/Table 5 evaluation packages are not included in these Web task
+ZIPs. They are needed only for the dedicated full-paper reproduction commands,
+not for launching the interface or using new feedback.

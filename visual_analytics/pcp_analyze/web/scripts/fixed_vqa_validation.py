@@ -222,6 +222,10 @@ def _manifest(service: Any, version: str | None) -> tuple[dict, str, str]:
 
 
 def active_vqa_validation_info(service: Any) -> dict | None:
+    import portable_tasks
+    portable = portable_tasks.active_info(service)
+    if portable is not None:
+        return portable
     if not (service.vqa_validation_root / "active.json").exists():
         return None
     manifest, digest, version = _manifest(service, None)
@@ -320,6 +324,9 @@ def freeze_vqa_validation(service: Any, version: str) -> dict:
 def load_vqa_validation_split(service: Any, task_id: str, target_id: str,
                               version: str | None = None) -> Any:
     """Read fixed members and revalidate source/fit/label identities, never split."""
+    import portable_tasks
+    if portable_tasks.available(service, task_id):
+        return portable_tasks.validation_split(service, task_id, target_id, version)
     import numpy as np
     from tuning_supervision import ProbeValidationSplit
 

@@ -13,8 +13,9 @@ The launcher starts the Web application and tuning API, using
 ## Launch options
 
 Run these commands from this Web directory, after installing dependencies and
-the required [Web assets](../../../docs/assets.md). The currently published
-HF features/probes are only part of those inputs.
+the required [task ZIP and local images](../../../docs/manual_setup.md).
+The task ZIP supplies saved rankings and Weight Tune inputs; matching HF features
+and checkpoints additionally enable native probe updates.
 
 - Combined development launcher: `npm run dev` starts the API on
   `127.0.0.1:8787`, waits for it, and starts the interface at

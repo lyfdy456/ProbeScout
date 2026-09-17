@@ -17,7 +17,7 @@ from val_isolation import METHODS, SEEDS, digest, load_task_contract, materializ
 def main() -> None:
     from tuning_server import TuningService
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--directory", type=Path, required=True)
+    parser.add_argument("--directory", type=Path, help="Optional legacy Val contract directory")
     parser.add_argument("--task-id", required=True)
     parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument("--execute", action="store_true")
@@ -26,7 +26,15 @@ def main() -> None:
         raise RuntimeError("epochs must be positive")
     web = Path(__file__).resolve().parents[1]
     service = TuningService(web, start_worker=False)
-    contract = load_task_contract(service, args.directory.resolve(), args.task_id)
+    if args.directory is not None:
+        contract = load_task_contract(service, args.directory.resolve(), args.task_id)
+    else:
+        import portable_tasks
+        from val_isolation import build_task_contract
+        portable_tasks.validation_split(service, args.task_id, "joint")
+        value, contract, _ = portable_tasks.document(service, args.task_id)
+        if build_task_contract(service, args.task_id, value["validationProvenance"]["version"]) != contract:
+            raise RuntimeError("Portable training contract differs from the installed task")
     context = service._tuning_source_context(args.task_id)
     adapter = context.adapter
     records = adapter.records.sort_values("embedding_index")
@@ -71,7 +79,7 @@ def main() -> None:
         if any(output.iterdir()):
             raise RuntimeError("Refusing an unverified existing output directory")
         fixed._write(identity_path, identity)
-    harness.configure(contract["dataset"], contract["taskName"])
+    harness.configure(contract["dataset"], contract["taskName"], adapter=adapter)
     if list(harness.ATTRS) != [attr["name"] for attr in contract["attributes"]]:
         raise RuntimeError("Adapter attribute identity changed")
     harness.EPOCHS = args.epochs

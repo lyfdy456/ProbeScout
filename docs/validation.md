@@ -1,17 +1,42 @@
 # Release validation
 
+## Portable setup, 2026-09-17
+
+An isolated copy of the source was populated from the three task ZIPs, with no
+legacy VQA acquisition or historical session directories. All 17 tasks loaded
+their original labels, fixed Val and initial F0, and reconstructed exactly the
+published bank isolation contracts. The training CLI passed a Cars preflight.
+
+For Cars, preparation generated all 162 thumbnail atlases from local images.
+A browser check loaded the gallery, SigLIP projection, F0 evidence and diagnostics
+without request/script errors. Weight Tune completed with 44 fixed Val examples.
+A separate real native update continued all eight methods and five seeds for
+one Cars attribute, using one epoch, and completed successfully. Its generated
+feedback and models remain only in the temporary validation directory.
+
+Validation used Windows and the existing compatible Python/Node dependencies;
+it was not a new dependency installation or a full paper retraining. HICO and
+CelebA passed numerical/task-contract loading; their full image galleries were
+not regenerated in this check. The Vite/Vinext browser-module loading issue found
+during this check was fixed with explicit dependency-module access; unrelated
+filesystem paths remain blocked.
+
+All task ZIPs and metadata were verified against the uploaded HF file hashes.
+The immutable revision is pinned in `manifests/task_packages.json`.
+
 ## Core tests
 
-The release retains 24 test files and two support files, reduced from 104 test
-and support files on 2026-09-16. These are executable correctness checks, not
+The release retains 26 test files and two support files, reduced from 104 test
+and support files. Two focused checks cover portable labels and browser-module
+access. These are executable correctness checks, not
 experiment results. Tests generate synthetic data and temporary models; running
 the application does not require running the tests.
 
 | Suite | Test files | Latest result | Coverage |
 |---|---:|---|---|
 | Probe learning | 7 | 38 passed | Eight probe implementations, checkpoint loading, fixed holdouts, gate calibration, supervision merging, Main17/ablation entries and credential exclusions |
-| Web backend | 9 | 79 passed | Fusion and feedback numerics, frozen gates, immutable Val, probe snapshots, session isolation and the update-to-refinement workflow |
-| Frontend | 7 | 36 passed | Score/weight alignment, scoped metrics and Development/Frozen Test separation |
+| Web backend | 10 | 81 passed | Fusion/feedback, portable labels, frozen gates/Val, probe snapshots and session isolation |
+| Frontend | 8 | 37 passed | Score/weight alignment, Development/Frozen Test separation and browser-module access |
 | Optional Main17 assets | 1 | Passed for all 17 local task bundles | Binary checksums, image IDs, attribute order and fixed queries |
 
 Run the synthetic suites after installing the documented dependencies:

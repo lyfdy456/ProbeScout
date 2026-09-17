@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "ProbeScout",
-  "status": "private-features-and-probes-verified-evidence-pending",
+  "status": "public-tasks-features-and-probes-verified",
   "github": {
     "purpose": "source-configurations-manifests",
     "large_binary_assets": false,
@@ -11,7 +11,8 @@
     "purpose": "pretrained-probes-features-frozen-initial-evidence",
     "model_repository_id": "Ian100/ProbeScout-probes",
     "dataset_repository_ids": [
-      "Ian100/ProbeScout-features"
+      "Ian100/ProbeScout-features",
+      "Ian100/ProbeScout-tasks"
     ],
     "revision": null,
     "human_feedback_data": false,
@@ -25,13 +26,14 @@
       "frozen-evaluation-split",
       "initial-fusion-evidence"
     ],
-    "visibility": "private",
-    "upload_status": "probes and all global/patch features uploaded; remote hashes verified",
-    "evidence_repository_id": null,
-    "evidence_upload_status": "prepared; additional-data authorization pending",
+    "visibility": "public",
+    "upload_status": "tasks, probes and global/patch features uploaded; remote hashes verified",
+    "evidence_repository_id": "Ian100/ProbeScout-tasks",
+    "evidence_upload_status": "Main17 portable tasks and initial Web evidence published; images and historical human feedback excluded",
     "verified_revisions": {
       "Ian100/ProbeScout-probes": "3d8fbdcc9921c0a3a20e2c8cbd0cd102b124d904",
-      "Ian100/ProbeScout-features": "3ef237a82d0c738a159aa49bb86764732d331265"
+      "Ian100/ProbeScout-features": "3ef237a82d0c738a159aa49bb86764732d331265",
+      "Ian100/ProbeScout-tasks": "f6dd54084ba0352d80ae6d3bb2171380c6ac63bb"
     }
   },
   "excluded_artifact_types": [
