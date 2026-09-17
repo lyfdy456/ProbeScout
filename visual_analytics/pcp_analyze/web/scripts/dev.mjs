@@ -7,6 +7,8 @@ const webRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const tuningScript = path.join(webRoot, "scripts", "tuning_server.py");
 const python = resolvePython();
 const vinextCli = path.join(webRoot, "node_modules", "vinext", "dist", "cli.js");
+const apiPort = process.env.PROBESCOUT_API_PORT || "8787";
+const webPort = process.env.PROBESCOUT_WEB_PORT || "3000";
 
 let stopping = false;
 let sidecar;
@@ -22,7 +24,7 @@ function stop(exitCode = 0) {
 
 async function waitForSidecar() {
   const deadline = Date.now() + 30_000;
-  const endpoint = "http://127.0.0.1:8787/api/tuning/health";
+  const endpoint = `http://127.0.0.1:${apiPort}/api/tuning/health`;
   while (Date.now() < deadline) {
     if (sidecar.exitCode !== null) {
       throw new Error(`Tuning service exited with code ${sidecar.exitCode}`);
@@ -35,13 +37,13 @@ async function waitForSidecar() {
     }
     await new Promise((resolve) => setTimeout(resolve, 200));
   }
-  throw new Error("Timed out waiting for the tuning service on port 8787");
+  throw new Error(`Timed out waiting for the tuning service on port ${apiPort}`);
 }
 
 process.on("SIGINT", () => stop(0));
 process.on("SIGTERM", () => stop(0));
 
-sidecar = spawn(python, [tuningScript], {
+sidecar = spawn(python, [tuningScript, "--port", apiPort], {
   cwd: webRoot,
   env: { ...process.env, PYTHONUNBUFFERED: "1" },
   stdio: "inherit",
@@ -68,10 +70,10 @@ try {
 
 frontend = spawn(
   process.execPath,
-  [vinextCli, "dev", "--hostname", "127.0.0.1", "--port", "3000"],
+  [vinextCli, "dev", "--hostname", "127.0.0.1", "--port", webPort],
   {
   cwd: webRoot,
-  env: process.env,
+  env: { ...process.env, PCP_TUNING_API_URL: `http://127.0.0.1:${apiPort}` },
   stdio: "inherit",
   windowsHide: true,
   },

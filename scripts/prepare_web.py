@@ -15,7 +15,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "visual_analytics/pcp_analyze/web"
 sys.path.insert(0, str(WEB / "scripts"))
-DIRECTORIES = {"cars": "stanford_cars/images", "hico": "HICO/images", "celeba": "CelebA/img_celeba"}
+from dataset_images import DIRECTORIES, image_root
 
 
 def inside(base: Path, relative: str) -> Path:
@@ -54,7 +54,7 @@ def verify_package(dataset: str):
 def image_jobs(catalog, without_images=False):
     jobs = []
     for dataset in catalog["datasets"]:
-        raw = ROOT / "dataset/raw" / DIRECTORIES[dataset["id"]]
+        raw = image_root(ROOT, dataset["id"])
         for task in dataset["tasks"]:
             bundle = inside(WEB / "public", task["dataRoot"].lstrip("/"))
             manifest = read(bundle / "manifest.json")
@@ -101,6 +101,7 @@ def main():
             if directory not in done:
                 args.webp_quality = config.get("webpQuality", 62)
                 result = build_atlases(ids, raw, bundle, config, args)
+                print(f"Thumbnails: {result['generatedAtlases']} generated, {result['reusedAtlases']} reused", flush=True)
                 if result["missingSourceCount"]:
                     raise RuntimeError("Some images could not be decoded; fix them and use --force-atlases")
                 done[directory] = identity

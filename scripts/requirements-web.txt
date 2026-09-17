@@ -1,0 +1,7 @@
+# CPU environment for the published task gallery and Weight Tune / Staged.
+numpy==2.4.4
+scipy==1.17.1
+pandas==3.0.2
+pillow==12.2.0
+scikit-learn==1.8.0
+torch==2.11.0+cpu

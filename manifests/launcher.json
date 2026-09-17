@@ -1,0 +1,24 @@
+{
+  "uv": {
+    "url": "https://github.com/astral-sh/uv/releases/download/0.9.18/uv-x86_64-pc-windows-msvc.zip",
+    "sha256": "28cbe5d30907a774bfe27a517a39b494ec6f7d3816bda8bbf6f9645490449182"
+  },
+  "node": {
+    "url": "https://nodejs.org/download/release/v24.11.1/node-v24.11.1-win-x64.zip",
+    "sha256": "5355ae6d7c49eddcfde7d34ac3486820600a831bf81dc3bdca5c8db6a9bb0e76",
+    "directory": "node-v24.11.1-win-x64"
+  },
+  "python": "3.12.12",
+  "features": {
+    "repoId": "Ian100/ProbeScout-features",
+    "repoType": "dataset",
+    "revision": "3ef237a82d0c738a159aa49bb86764732d331265",
+    "manifestSha256": "765620c5f160f26512b6dd8b20ccbc73fd7c804ecfdd28f453d5cd2b3b2118ad"
+  },
+  "probes": {
+    "repoId": "Ian100/ProbeScout-probes",
+    "repoType": "model",
+    "revision": "3d8fbdcc9921c0a3a20e2c8cbd0cd102b124d904",
+    "manifestSha256": "36c7df49728e41ce7f2d4035f243bd2a76822e37a22b4ba38775e6a5832a7f3b"
+  }
+}

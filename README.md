@@ -4,42 +4,36 @@ Visual analytics for attribute-guided image search. ProbeScout trains eight
 probes per attribute on frozen SigLIP features, combines their evidence, and
 supports interactive inspection and feedback.
 
-## Start with one dataset
+## One-click local setup
 
-Choose Cars, HICO-DET or CelebA. For the Web interface, download the original
-images and the matching [task ZIP](https://huggingface.co/datasets/Ian100/ProbeScout-tasks).
-Follow [manual setup](docs/manual_setup.md) for the image layout and installation.
+On **Windows x64**, download either launcher package and extract it:
 
-From the repository root, install dependencies (Python 3.11+, Node.js 22.13+):
+| Download | Installed for your selected dataset | From a Git clone |
+|---|---|---|
+| [Starter](https://github.com/lyfdy456/ProbeScout/releases/download/v0.2.0-launcher/ProbeScout-Starter-Windows.zip) | Task package for browsing and Weight Tune / Staged | Double-click `start.bat` |
+| [Full](https://github.com/lyfdy456/ProbeScout/releases/download/v0.2.0-launcher/ProbeScout-Full-Windows.zip) | Task package + features + trained probes | Double-click `start-full.bat` |
 
-```sh
-uv sync --project probe_learning --locked
-cd visual_analytics/pcp_analyze/web
-npm ci
-cd ../../..
-```
+Both ZIPs contain code and a launcher. The selected assets are downloaded from
+HF on first launch; Full does not download all three datasets.
 
-After extracting the task ZIP into the repository root and placing the images:
+1. Download and extract the original images for Cars, HICO-DET or CelebA using
+   the [image layout guide](docs/manual_setup.md#3-place-original-images-for-image-galleries).
+2. Double-click `start.bat` in the extracted package.
+3. Choose your dataset and image folder, then click **Prepare & open**.
 
-```sh
-uv run --project probe_learning python scripts/prepare_web.py --dataset cars
-cd visual_analytics/pcp_analyze/web
-npm run dev
-```
+The launcher installs Python/Node and a CPU environment locally, downloads the
+assets, builds thumbnails and opens the Web interface. Later launches reuse the
+installation. [Setup details and troubleshooting](docs/launcher.md).
 
-Open http://localhost:3000. The launcher starts both the Web interface and Python
-API. [Other launch options](visual_analytics/pcp_analyze/web/README.md#launch-options)
-are available.
-
-**Original images are required for photograph previews.** HF embeddings skip
-feature extraction. Cached browsing and **Weight Tune / Staged** need only the
-images and task ZIP; they do not require the large feature or checkpoint downloads.
+**Original images are required for photograph previews.** HF features let you
+skip feature extraction. For other platforms or CUDA training, see
+[manual setup](docs/manual_setup.md).
 
 ## Choose a workflow
 
 | Goal | Guide | Additional inputs |
 |---|---|---|
-| Browse rankings and use paper feedback | [Manual setup](docs/manual_setup.md) | None beyond images + task ZIP |
+| Browse rankings and use paper feedback | [One-click setup](docs/launcher.md) | Original images |
 | Train a new task | [New tasks](docs/new_tasks.md) | Features, task JSON, per-image labels |
 | Extract features or train Main17 probes | [Workflow](docs/workflow.md) | Features and task training inputs |
 | Update probe weights with feedback | [Workflow](docs/workflow.md#feedback) | Features and matching checkpoint banks |
@@ -70,7 +64,7 @@ download commands. Historical human feedback and sessions are excluded.
 
 | Directory | Purpose |
 |---|---|
-| `scripts/` | Training, new tasks, Web preparation and evaluation commands |
+| `scripts/` | Local launcher, Web preparation, training and evaluation commands |
 | `configs/` | Paper tasks, probe suite, training and ablation settings |
 | `probe_learning/` | Feature extraction, acquisition, probes and evaluation |
 | `attribute_annotation/` | Attribute TXT extraction and VQA JSONL labeling |

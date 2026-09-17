@@ -6,7 +6,7 @@ import os
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-IGNORED = {".git", ".venv", "venv", "node_modules", "__pycache__", ".pytest_cache", ".vendor", ".next", ".vinext", ".npm-cache", "build", "dist", ".wrangler"}
+IGNORED = {".git", ".venv", ".probescout", "venv", "node_modules", "__pycache__", ".pytest_cache", ".vendor", ".next", ".vinext", ".npm-cache", "build", "dist", ".wrangler"}
 FORBIDDEN_PARTS = {"runtime", "users", "sessions", "human_feedback", "feedback_data", "case_replay"}
 BINARY_ASSETS = {".npy", ".npz", ".pt", ".pth", ".safetensors", ".f32", ".f64", ".sqlite", ".sqlite3", ".db"}
 CREDENTIAL_TOKEN = re.compile(r"\b(?:sk-[A-Za-z0-9_-]{20,}|hf_[A-Za-z0-9]{25,}|AKIA[A-Z0-9]{16})\b")

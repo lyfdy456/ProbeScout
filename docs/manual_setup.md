@@ -1,5 +1,9 @@
 # Run one dataset locally
 
+Windows users can use [one-click setup](launcher.md) to install dependencies and
+download the selected assets automatically. The commands below are the manual
+route, including the CUDA training environment.
+
 Choose Cars, HICO-DET or CelebA. Download its original images and task ZIP,
 then follow the paths and commands below. Saved rankings and Weight Tune / Staged
 need no feature or checkpoint download. Training and Update Probes use the

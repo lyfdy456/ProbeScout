@@ -200,7 +200,8 @@ def adapter(service, task_id):
     if records["relative_path"].tolist() != images or records["embedding_index"].tolist() != list(range(len(images))):
         raise RuntimeError("Portable records and Web image order differ")
     attributes = value["attributes"]
-    raw = processed.parent / ("img_celeba" if task.dataset_id == "celeba" else "images")
+    from dataset_images import image_root
+    raw = image_root(root(service), task.dataset_id)
     return DatasetAdapter(dataset=task.dataset_id, task=task.task_name,
         attrs=[a["name"] for a in attributes], key_slugs=[a["id"] for a in attributes],
         joint_label=value["jointLabel"], emb_path=processed/"siglip_embedding.npy",

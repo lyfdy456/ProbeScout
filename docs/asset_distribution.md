@@ -4,6 +4,10 @@ GitHub contains source, configuration, dependency locks, paper scope and core
 tests. Hugging Face contains tasks, frozen Web evidence, features and models.
 All three HF repositories are public; download authorization is not required.
 
+The [Windows launcher](launcher.md) handles these downloads automatically:
+Starter downloads tasks; Full also downloads features and probes for the selected
+dataset. The commands below are for manual installation.
+
 | Package | Contents | Size | Immutable identity |
 |---|---|---:|---|
 | [ProbeScout-tasks](https://huggingface.co/datasets/Ian100/ProbeScout-tasks) | 3 dataset ZIPs: Main17 definitions, original VQA labels, records, splits, Web arrays and initial F0 | 0.85 GB compressed | [task_packages.json](../manifests/task_packages.json) |

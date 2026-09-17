@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ProbeScout · Local setup</title>
+<style>
+:root{font-family:Inter,Segoe UI,system-ui,sans-serif;color:#22332f;background:#f4f6f1;color-scheme:light}
+*{box-sizing:border-box}body{margin:0}main{max-width:1080px;margin:48px auto;padding:0 24px 40px}
+header{display:flex;align-items:center;gap:12px;margin-bottom:40px}.mark{background:#184d3e;color:white;border-radius:12px;padding:11px;font-size:20px}header strong{font-size:22px;letter-spacing:-.6px}header span{color:#66756d;font-size:13px}h1{font-size:38px;letter-spacing:-1.3px;line-height:1.12;margin:0 0 14px}p{line-height:1.6;color:#627068}h2{font-size:17px;margin:0 0 18px}.intro{max-width:750px;margin-bottom:28px}.grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(280px,1fr);gap:24px}.panel{background:white;border:1px solid #dfe5da;border-radius:18px;padding:26px}.profiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:26px}.profile{display:block;padding:17px 14px;border:1px solid #dce4d8;border-radius:12px;cursor:pointer}.profile:has(input:checked){border-color:#236148;background:#f1f7ef;box-shadow:0 0 0 1px #236148}.profile strong{font-size:15px}.profile p{font-size:12px;margin:9px 0 0}.profile input{accent-color:#236148;margin:0 7px 0 0}label.field{display:block;font-size:13px;font-weight:600;margin:20px 0 9px}select,input[type=text]{font:inherit;color:inherit;padding:12px;border:1px solid #cbd6c9;border-radius:8px;background:#fff;width:100%;min-width:0}input:focus,select:focus,button:focus-visible{outline:3px solid #a8cdb3;outline-offset:2px}.path{display:flex;gap:8px}.path input{font-size:13px}.hint{font-size:12px;margin:9px 0 0}code{font-family:Consolas,monospace;overflow-wrap:anywhere}button,.button{font:inherit;font-size:14px;border:0;border-radius:8px;padding:12px 18px;cursor:pointer;font-weight:600;background:#174d3b;color:white;text-decoration:none;display:inline-block}button.secondary{background:#edf2e9;color:#254b39;white-space:nowrap}button:disabled{cursor:wait;opacity:.6}.actions{display:flex;gap:10px;margin-top:24px;align-items:center}.error{color:#98291d;background:#fff2ee;border-radius:8px;padding:12px;font-size:13px;line-height:1.5;margin-top:16px;overflow-wrap:anywhere}.estimate{font-size:13px;padding:14px;background:#f5f6f0;border-radius:8px;margin-top:18px;line-height:1.6}.stages{list-style:none;margin:0;padding:0}.stages li{display:flex;align-items:center;gap:12px;padding:12px 0;font-size:13px;color:#8a948c}.dot{display:block;width:23px;height:23px;border-radius:50%;background:#edf0e9;text-align:center;line-height:23px;font-size:11px}.stages li.active{color:#174d3b;font-weight:600}.active .dot{background:#174d3b;color:white}.stages li.done{color:#37624a}.done .dot{background:#dbeadb;color:#174d3b}#message{font-size:13px;overflow-wrap:anywhere}progress{width:100%;height:7px;accent-color:#2c7156}#transfer{font-size:11px;color:#67786b;overflow-wrap:anywhere}.footer{font-size:12px;margin:20px 0 0}a{color:#236148}details{margin-top:24px;font-size:12px;color:#6d786e}summary{cursor:pointer}pre{font:11px/1.6 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f5ef;padding:14px;max-height:220px;overflow:auto;border-radius:8px}[hidden]{display:none!important}@media(max-width:760px){main{margin-top:24px}.grid{grid-template-columns:1fr}h1{font-size:31px}.panel{padding:20px}}
+</style>
+<main>
+<header><div class="mark" aria-hidden="true">P</div><div><strong>ProbeScout</strong><br><span>Local workspace</span></div></header>
+<div class="intro"><h1>Your images. Ready to explore.</h1><p>Choose a dataset and point to its original images. ProbeScout prepares the environment and opens your visual workspace.</p></div>
+<div class="grid">
+<section class="panel"><h2>1. Choose your installation</h2>
+<form id="setup">
+<div class="profiles">
+<label class="profile"><input type="radio" name="edition" value="basic" checked><strong>Starter</strong><p>Task package downloaded on first launch. Browse images and use Weight Tune / Staged.</p></label>
+<label class="profile"><input type="radio" name="edition" value="full"><strong>Full</strong><p>Task package, features and trained probes for the selected dataset. Ready for further experiments.</p></label>
+</div>
+<label class="field" for="dataset">Dataset</label><select id="dataset"><option value="cars">Stanford Cars · 7 tasks</option><option value="hico">HICO-DET · 8 tasks</option><option value="celeba">CelebA · 2 tasks</option></select>
+<label class="field" for="imageRoot">Original image folder</label><div class="path"><input id="imageRoot" type="text" placeholder="Select or paste a folder path" autocomplete="off" spellcheck="false"><button type="button" id="browse" class="secondary">Browse…</button></div>
+<p class="hint" id="layout"></p>
+<p class="hint">Images stay in this folder. <a href="https://github.com/lyfdy456/ProbeScout/blob/codex/initial-source/docs/manual_setup.md#3-place-original-images-for-image-galleries" target="_blank" rel="noreferrer">Dataset download &amp; layout guide ↗</a></p>
+<div class="estimate" id="estimate"></div>
+<div class="actions"><button id="start" type="submit">Prepare &amp; open</button><a id="open" class="button" hidden>Open ProbeScout ↗</a></div>
+<div class="error" id="error" role="alert" hidden></div>
+</form>
+<p class="footer">You can switch datasets or upgrade to Full here later. Downloaded assets are reused.</p>
+</section>
+<section class="panel" aria-live="polite"><h2>2. Prepare your workspace</h2>
+<ol class="stages"><li data-stage="environment"><span class="dot">1</span>Install local dependencies</li><li data-stage="tasks"><span class="dot">2</span>Download task package</li><li data-stage="images"><span class="dot">3</span>Check images &amp; build thumbnails</li><li data-stage="features"><span class="dot">4</span>Download features &amp; probes <small>(Full)</small></li><li data-stage="starting"><span class="dot">5</span>Start the Web interface</li></ol>
+<p id="message">Waiting for your selection.</p><progress id="progress" hidden></progress><p id="transfer"></p>
+<details id="details"><summary>Installation log</summary><pre id="logs"></pre></details>
+<p class="footer">First launch needs internet access. Keep the launcher window open while using ProbeScout. Ctrl+C stops the local services.</p>
+</section></div>
+</main>
+<script>
+const token = location.hash.slice(1) || sessionStorage.getItem('setupToken') || '';
+sessionStorage.setItem('setupToken', token);
+history.replaceState(null, '', location.pathname);
+const $ = id => document.getElementById(id);
+let first = true, roots = {}, serverEdition = 'basic', polling = false;
+const info = {
+  cars: {size: '94 MB', full: '7.16 GB', space: 'about 12 GB', path: 'dataset/raw/stanford_cars/images', hint: 'Use car_ims images: 000001.jpg … 016185.jpg. Select the folder containing these files.'},
+  hico: {size: '320 MB', full: '17.38 GB', space: 'about 23 GB', path: 'dataset/raw/HICO/images', hint: 'Select images/, containing train2015/ and test2015/ from HICO-DET.'},
+  celeba: {size: '439 MB', full: '63.11 GB', space: 'about 130 GB at installation', path: 'dataset/raw/CelebA/img_celeba', hint: 'Select img_celeba/ with 000001.jpg … 202599.jpg. Use In-The-Wild Images (not aligned/cropped).'}
+};
+function describe() {
+  const data = info[$('dataset').value];
+  const full = document.querySelector('[name=edition]:checked').value === 'full';
+  $('layout').textContent = data.hint;
+  $('estimate').textContent = full ? `Assets: ${data.full}. Allow ${data.space} of free space, excluding original images. Includes a CPU environment; CUDA setup is available in the manual guide.` : `Task download: ${data.size}. Allow about 5 GB for the environment, tasks and thumbnails, excluding original images. Large feature and probe caches are not downloaded.`;
+  $('imageRoot').placeholder = data.path;
+}
+async function api(path, body) {
+  const response = await fetch(path, {method: body ? 'POST' : 'GET', headers: {'X-Setup-Token': token, 'Content-Type': 'application/json'}, ...(body ? {body: JSON.stringify(body)} : {})});
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+function error(message) { $('error').textContent = message; $('error').hidden = !message; }
+$('dataset').onchange = () => { $('imageRoot').value = roots[$('dataset').value] || ''; describe(); };
+document.querySelectorAll('[name=edition]').forEach(input => input.onchange = describe);
+$('browse').onclick = async () => {
+  $('browse').disabled = true;
+  try { const data = await api('/folder', {}); if (data.path) $('imageRoot').value = data.path; }
+  catch (e) { error(e.message + ' You can paste the path instead.'); }
+  finally { $('browse').disabled = false; }
+};
+$('setup').onsubmit = async event => {
+  event.preventDefault(); error(''); $('start').disabled = true;
+  try { await api('/start', {dataset: $('dataset').value, edition: document.querySelector('[name=edition]:checked').value, imageRoot: $('imageRoot').value}); }
+  catch (e) { error(e.message); }
+  finally { await poll(); }
+};
+async function poll() {
+  if (polling) return;
+  polling = true;
+  try {
+    const state = await api('/status');
+    roots = state.imageRoots;
+    if (first) {
+      first = false; $('dataset').value = state.dataset; $('imageRoot').value = roots[state.dataset] || '';
+      document.querySelector(`[name=edition][value=${state.edition}]`).checked = true; describe();
+    }
+    serverEdition = state.edition;
+    $('start').disabled = state.busy;
+    $('start').textContent = state.busy ? 'Preparing…' : state.stage === 'error' ? 'Retry' : state.stage === 'ready' ? 'Apply & restart' : 'Prepare & open';
+    $('message').textContent = state.message;
+    if (state.stage === 'error') { error(state.message); $('details').open = true; }
+    $('open').hidden = !state.url; if (state.url) $('open').href = state.url;
+    $('logs').textContent = state.logs.join('\n');
+    const progress = state.progress;
+    $('progress').hidden = !progress || !state.busy;
+    if (progress) { $('progress').max = progress.total || 1; $('progress').value = progress.bytes; }
+    $('transfer').textContent = progress && state.busy ? `${progress.file}: ${(progress.bytes / 1e6).toFixed(1)} / ${(progress.total / 1e6).toFixed(1)} MB` : '';
+    const stage = ['environment','tasks','images','features','probes','starting','ready'].indexOf(state.stage);
+    document.querySelectorAll('[data-stage]').forEach(item => {
+      const index = ['environment','tasks','images','features','probes','starting','ready'].indexOf(item.dataset.stage);
+      item.className = stage === index || (state.stage === 'probes' && index === 3) ? 'active' : stage > index ? 'done' : '';
+      item.hidden = item.dataset.stage === 'features' && serverEdition !== 'full';
+      if (item.dataset.stage === 'starting') item.querySelector('.dot').textContent = serverEdition === 'full' ? '5' : '4';
+    });
+  } catch (e) { error(`Cannot reach the launcher. Keep its window open or run start.bat again. ${e.message}`); }
+  finally { polling = false; }
+}
+describe(); poll(); setInterval(poll, 1500);
+</script>
+</html>

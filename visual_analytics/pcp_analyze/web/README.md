@@ -1,5 +1,8 @@
 # ProbeScout interface
 
+For automatic setup on Windows x64, use `start.bat` or `start-full.bat` at the
+repository root. See [one-click setup](../../../docs/launcher.md).
+
 After [preparing assets](../../../docs/assets.md), run here:
 
 ```sh
@@ -21,7 +24,8 @@ to supply the JSON/CSV inputs, train and register a local task before launching.
 
 - Combined development launcher: `npm run dev` starts the API on
   `127.0.0.1:8787`, waits for it, and starts the interface at
-  `http://127.0.0.1:3000`. This is the default local entry point.
+  `http://127.0.0.1:3000`. The one-click launcher sets free ports through
+  `PROBESCOUT_API_PORT` and `PROBESCOUT_WEB_PORT`.
 - Separate processes: run `npm run tuning:server` in one terminal and
   `npm run dev:web` in another. The frontend proxies `/api/tuning` to the API.
 - Build commands: `npm run build` and `npm start` exist for the frontend.

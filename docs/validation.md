@@ -7,6 +7,7 @@
 | Probe learning | 38 tests passed |
 | Web backend | 88 tests passed |
 | Frontend | 37 tests passed |
+| Local launcher | 9 tests passed: asset selection, resume/retry, checksum failures, ZIP boundaries, setup access and shard reconstruction |
 | TypeScript | `tsc --noEmit` passed |
 | Release boundary | Source/configuration, credential fields and exclusions passed |
 
@@ -21,8 +22,26 @@ projections and clusters. Reloaded scores matched the recorded Val AP/F1, and
 Weight Tune / Staged completed against the same 44 Val rows.
 
 This is a pipeline check; the default scientific training run uses 100 epochs.
-Validation used Windows with existing Python/Node dependencies. Fresh dependency
-installation and full HICO/CelebA new-task training remain unverified.
+Full HICO/CelebA new-task training remains unverified.
+
+## One-click launcher
+
+A separate Windows checkout installed uv, Python 3.12.12, Node 24.11.1, Web
+dependencies and CPU PyTorch from their public download sources. Starter fetched
+the pinned Cars task ZIP, prepared all 7 tasks and 162 thumbnail atlases, and
+opened the Web/API pair on available ports. Browser checks passed for the setup
+page, gallery thumbnails and enlarged original images. Weight Tune / Staged ran
+10 iterations using the same 44 fixed Val examples without Test metrics.
+
+Full installed its additional Python dependencies and verified all Cars feature
+and probe assets. Existing large public payloads were reused through hard links
+in the test checkout; manifests and a missing metadata file were downloaded.
+All 7 Cars banks reported native-update capability. Basic-to-Full switching,
+offline restart and duplicate-launch handling passed.
+
+HICO/CelebA download selection uses the published dataset manifest entries;
+CelebA reconstruction is covered with a small sharded fixture. Their complete
+downloads and thumbnail preparation were not rerun for this launcher release.
 
 ## Earlier release checks
 
@@ -41,6 +60,7 @@ Full-model macro Test AP was `0.8320685393249247` and Gallery AP
 ```sh
 # From the repository root
 python scripts/check_release.py
+python -m unittest discover -s scripts/tests
 cd probe_learning
 uv run python -B -m unittest discover -s tests
 cd ../visual_analytics/pcp_analyze/web
@@ -48,7 +68,7 @@ npm run test:tuning
 npm run test:unit
 ```
 
-The release retains 27 core test files plus two support files. Tests cover probe
+Core tests cover probe
 numerics, Val isolation, feedback and Development/Frozen Test metric separation.
 `npm run test:assets` additionally checks prepared Main17 bundles; set
 `PROBESCOUT_ASSET_WEB` to use bundles outside the source checkout.

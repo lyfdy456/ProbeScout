@@ -1,0 +1,8 @@
+-r requirements-web.txt
+# The local launcher uses CPU wheels. See manual_setup.md for CUDA training.
+torchvision==0.26.0+cpu
+transformers==5.8.1
+PyYAML==6.0.3
+sentencepiece==0.2.2
+protobuf==7.35.1
+tqdm==4.67.3
