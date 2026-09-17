@@ -10,13 +10,13 @@ const TUNING_ACTIONS: ReadonlyArray<{
 }> = [
   {
     mode: "weight_staged",
-    label: "Staged Weight Refinement",
-    description: "冻结所选 Probe 快照；先训练 β，再训练 γ、η、λ。θ/T 全程固定。",
+    label: "Weight Tune / Staged",
+    description: "论文反馈方法：冻结 Probes 和 gates，先更新 β，再更新 γ、η、λ。",
   },
   {
     mode: "weight_joint",
     label: "Joint Weight Tune",
-    description: "冻结所选 Probe 快照；同时训练 β、γ、η、λ。θ/T 全程固定。",
+    description: "扩展方法：冻结 Probes 和 gates，同时更新 β、γ、η、λ。",
   },
 ];
 
@@ -75,7 +75,7 @@ function unavailableReason(input: {
   if (!hasUsableFeedback && mode === "update_probes") return "Add at least one positive or negative correction.";
   if (!hasUsableFeedback && hasSignedFeedback) return "All corrections are held out; remove them or add Development feedback.";
   if (mode !== "update_probes" && state.probeSource === "updated" && !state.selectedProbeUpdate) return "Choose a compatible updated Probe snapshot.";
-  if (mode === "update_probes") return "用原监督和人工反馈更新 Probes，保存并冻结快照；不自动训练权重。";
+  if (mode === "update_probes") return "可选扩展：用原监督和人工反馈更新 Probes，保存新的快照。";
   if (!hasUsableFeedback) return "无人工反馈：仅使用原 VQA 训练监督。";
   return TUNING_ACTIONS.find((action) => action.mode === mode)?.description
     ?? "Run tuning.";
@@ -168,7 +168,7 @@ export function TuningFunctionActions({
         disabled={updateDisabled}
         onClick={() => void state.updateProbes().catch(() => undefined)}
       >
-        Update Probes
+        Update Probes (extra)
       </button>
       {TUNING_ACTIONS.map((action) => (
         <button

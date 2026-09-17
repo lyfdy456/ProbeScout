@@ -16,7 +16,6 @@ Run these commands from this Web directory, after installing dependencies and
 the required [task ZIP and local images](../../../docs/manual_setup.md).
 The task ZIP supplies saved rankings and Weight Tune inputs; matching HF features
 and checkpoints additionally enable native probe updates.
-Original images are required for galleries even when using HF embeddings.
 For your own query/attributes, follow [New tasks](../../../docs/new_tasks.md)
 to supply the JSON/CSV inputs, train and register a local task before launching.
 
@@ -50,5 +49,6 @@ The retained core tests cover fusion/feedback numerics, frozen Val and gates,
 probe snapshots, the update/refinement workflow, and Development/Frozen Test
 metric separation. See [validation](../../../docs/validation.md) for results.
 
-The paper uses `weight_staged` with frozen probes/gates. New feedback stays in
-runtime. Historical sessions and derived models are excluded from publication.
+**Weight Tune / Staged** (`weight_staged`) is the paper feedback method, with
+frozen probes and gates. **Update Probes** is an optional extension that updates
+probe parameters. New feedback and results are saved in local runtime directories.

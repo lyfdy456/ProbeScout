@@ -1,26 +1,22 @@
 # Probe learning
 
-Frozen features, VQA acquisition, eight paper probes, cache validation and
-evaluation. Start with the [workflow](../docs/workflow.md) and
-[paper-to-code map](../docs/paper_method.md).
+Feature extraction, VQA acquisition, eight probes and retrieval evaluation.
+See [workflow](../docs/workflow.md) for inputs and
+[paper-to-code map](../docs/paper_method.md) for the method definitions.
 
-From the repository root:
+After preparing a dataset's task ZIP and features, run from the repository root:
 
 ```sh
 python scripts/train_probes.py --list
-uv run --project probe_learning python scripts/train_probes.py --directory /path/to/frozen-val-contracts
+uv run --project probe_learning python scripts/train_probes.py --task-id 001_cars_task_bmw_convertible
 ```
 
-Add `--execute` to train with prepared assets. Public commands are in the root
-`scripts/`; this module's `scripts/` contains shared utilities.
-`src/methods/catalog.py` defines the eight probe IDs.
+Add `--execute` to train. `src/methods/catalog.py` defines the eight probe IDs;
+this module's `scripts/` contains their shared utilities.
+
+To run the core learning tests:
 
 ```sh
 cd probe_learning
 uv run python -B -m unittest discover -s tests
 ```
-
-The seven core test files use synthetic inputs and temporary files. They cover
-the eight probes, checkpoint loading, holdout isolation, gate calibration,
-supervision merging, paper commands and publication exclusions. See
-[validation](../docs/validation.md) for scope and results.

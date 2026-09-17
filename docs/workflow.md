@@ -1,37 +1,26 @@
 # Workflow
 
-Commands run from the repository root unless stated otherwise. See
-[manual_setup.md](manual_setup.md) for manual downloads, relative image paths,
-task ZIP extraction and Web launch. Install only the datasets you need.
-Original images are required for image galleries and query previews. HF
-embeddings skip extraction, not the download of those images. For a new query
-or new attributes, follow [New tasks](new_tasks.md); `train_probes.py` below is
-the entry point for the published Main17 tasks.
+Run commands from the repository root unless a different directory is shown.
+[Manual setup](manual_setup.md) covers images, task ZIPs and Web launch;
+[new tasks](new_tasks.md) covers your own queries and supervision.
 
-## 1. Extract or load frozen features
+## Features
 
-Fix image order with the prepared `records.csv`. Skip extraction when using
-downloaded SigLIP features.
+Download the selected dataset's [HF features](asset_distribution.md), or extract
+them from local images in canonical `records.csv` order:
 
 ```sh
 uv run --project probe_learning python probe_learning/scripts/precompute_backbone_embeddings.py --dataset cars --backbone siglip
 uv run --project probe_learning python probe_learning/scripts/precompute_backbone_patch_tokens.py --dataset cars --backbone siglip
 ```
 
-Repeat with `--dataset hico` and `--dataset celeba`. Input: original images and
-ordered records. Output: `siglip_embedding.npy` (float32) and
-`siglip_patch_tokens.npy` (float16 by default) in each processed dataset directory.
-Keep their row order aligned. `EXPERIMENT_ROOT` may point learning utilities to
-existing external `dataset/raw` and `dataset/tasks` folders without copying arrays.
-Web bundle/runtime paths are configured separately by asset manifests.
+Replace `cars` with `hico` or `celeba`. Outputs are `siglip_embedding.npy` and
+`siglip_patch_tokens.npy` in that dataset's `processed/` directory.
 
-## 2. Train or load the eight probes
+## Main17 training
 
-For pretrained inference, install the bank and initial evidence packages and
-continue to step 3. Starting a Web session reads saved scores without retraining.
-
-For training, prepare original VQA labels, fixed Validation contracts, task
-metadata, features and matching Web task bundles:
+The task ZIP provides original VQA labels and fixed Val inputs. Prepare the Web
+catalog, install features, then run:
 
 ```sh
 python scripts/train_probes.py --list
@@ -39,86 +28,62 @@ uv run --project probe_learning python scripts/train_probes.py --task-id 001_car
 uv run --project probe_learning python scripts/train_probes.py --task-id 001_cars_task_bmw_convertible --execute
 ```
 
-The task ZIP supplies original VQA labels and fixed Val contracts; a separate
-`--directory` is only needed for legacy exports. Prepare the installed catalog
-first. Repeat `--task-id` for a subset; omitting it requires all Main17 tasks.
-Default: preflight. With `--execute`, use
-[paper_training.json](../configs/paper_training.json): eight methods, seeds 0-4,
-100 epochs and fixed-Validation checkpoint selection. Val, Test and query images
-stay out of fitting and the unlabeled pool.
+The first training command checks inputs; `--execute` trains. Repeat `--task-id`
+for a subset or omit it for all Main17 tasks. Defaults are eight methods, five
+seeds and 100 epochs with fixed-Val checkpoint selection, as specified in
+[paper_training.json](../configs/paper_training.json).
 
-Output: a new bank in
-`visual_analytics/pcp_analyze/runtime/isolated-probes/<task-id>/<identity>/`,
-with checkpoints, caches and metadata. Code/path changes produce a new training
-identity; old assets retain their original provenance.
+New banks are written to
+`visual_analytics/pcp_analyze/runtime/isolated-probes/<task-id>/<identity>/`.
+They can be selected/exported separately from the published initial ranking.
 
-The trainer uses `probe_learning/scripts/run_probebank_batch.py` for cache
-operations. Its acquisition-budget CLI does not replace fixed-Val paper training.
+## Fusion
 
-## 3. Fuse evidence and open the interface
-
-The application loads the pinned initial evidence included in the task ZIP:
+The shared implementation is `unified_weight_scores` in
+`visual_analytics/pcp_analyze/web/scripts/tuning_models.py`:
 
 ```text
-u = weighted mixture of the eight attribute-probe scores
+u = weighted mixture of eight attribute-probe scores
 g = sigmoid((u - theta) / temperature)
 C = product(g ** gamma)
-H = weighted mixture of query-image and query-text scores
+H = weighted mixture of query-image and attribute-text prompt scores
 F = C * ((1 - lambda) + lambda * H)
 ```
 
-Read `unified_weight_scores` in
-`visual_analytics/pcp_analyze/web/scripts/tuning_models.py`. Initial weights are
-uniform over probes and holistic methods, with `gamma = 1`, `lambda = 0.25`.
-The final initial gates are selected using original VQA Validation.
+Initial weights are uniform, with `gamma=1` and `lambda=0.25`. Final gates are
+selected on fixed Val. Published tasks load the F0 included in their ZIP;
+`custom_task.py` performs the calibration and export for new tasks.
 
-First run `uv run --project probe_learning python scripts/prepare_web.py --dataset cars`
-from the repository root (replace the dataset selection as needed). Then run
-from `visual_analytics/pcp_analyze/web`:
+For low-level Main17 exports, the scripts are
+`visual_analytics/pcp_analyze/web/scripts/unified_initial_baseline.py` (fit reference)
+and `visual_analytics/pcp_analyze/web/scripts/publish_val_initial_baseline.py`
+(Val-selected publication). The latter accepts `--inputs` pointing to a frozen F0
+selection bundle and `--version`; `--publish` activates the complete catalog.
+These inputs are distinct from Table 2/5 result reports.
 
-```sh
-npm run dev
-```
+## Feedback
 
-Input: catalog, task bundles, images/thumbnails, initial evidence and matching
-immutable runtime contracts. Output: the local API and interactive views.
+**Weight Tune / Staged is the paper method.** It freezes probes, normalization
+and gates. Stage 1 updates attribute-probe weights; Stage 2 updates attribute
+exponents and the holistic branch. The implementation is
+`fit_unified_weight_refinement` in `tuning_models.py`.
 
-For a newly trained bank, the low-level
-`scripts/unified_initial_baseline.py --task-id ... --bank-dir ... --version ...`
-stages fit-only reference evidence. Final Validation calibration/publication is
-a separate step. Do not call newly staged reference scores the pinned paper F0;
-the downloadable F0 package is the default inference path. The final staging
-utility is `scripts/publish_val_initial_baseline.py --inputs /path/to/frozen-f0-selection --version <new-version>`;
-add `--publish` to activate a fully verified local version. Its inputs are the
-dedicated F0 selection/evidence contract, not a Table 2 or Table 5 report. Every
-task in the installed catalog must be covered before activation.
+**Update Probes is an optional extension.** It updates probe parameters using
+supervision and new feedback and requires features plus the matching checkpoint
+bank. It is not the paper's frozen-probe feedback protocol.
 
-## 4. Inspect and refine with new feedback
+Development shows Val metrics. Test evaluation is confined to Frozen Test.
 
-Select images in linked views and provide attribute/query judgments. The paper
-uses `weight_staged` with frozen probes and gates. Stage 1 updates attribute
-mixtures; Stage 2 updates attribute exponents and the holistic branch.
+## Paper evaluation
 
-Read `fit_unified_weight_refinement` in `tuning_models.py`, and supervision
-construction in `tuning_supervision.py` / `tuning_server.py`. New local session
-state stays in runtime and is excluded from source publication.
-
-Development displays Validation metrics only, including expanded result details.
-Test AP, F1 and TP@K are shown only in the read-only Frozen Test view. Historical
-Test-only runs and runs without an explicit Validation scope do not display
-metrics in Development; their saved rankings can still be applied.
-
-## 5. Reproduce initial results
+After preparing the separate [evaluation inputs](assets.md):
 
 ```sh
-uv run --project probe_learning python scripts/evaluate_main17.py --clay /path/to/clay-cache --output outputs/table2
-uv run --project probe_learning python scripts/evaluate_ablation.py --assets /path/to/evaluation-assets --output outputs/table5
+uv run --project probe_learning python scripts/evaluate_main17.py --clay artifacts/evaluation/clay --output outputs/table2
+uv run --project probe_learning python scripts/evaluate_ablation.py --assets artifacts/evaluation --output outputs/table5
 ```
 
-Both commands write `val_selection.json` and `results.json` in a new directory.
-Choices use original VQA Val and are frozen before Test/Gallery evaluation.
-Historical human-feedback sessions are not read.
-
-Table 2 accepts `--web /path/to/prepared/web` to read existing evidence directly.
-Table 5 uses [component_inputs.json](../manifests/component_inputs.json), checking
-SHA-256, image identity and partition isolation before selection.
+The paths above are destinations for the required inputs, not files included in
+the source checkout. Both commands write `val_selection.json` and `results.json`.
+Table 2 can use `--web visual_analytics/pcp_analyze/web` for prepared Web evidence;
+Table 5 reads the snapshots pinned in [component_inputs.json](../manifests/component_inputs.json).

@@ -1,7 +1,7 @@
 """Build and atomically publish immutable, Val-isolated shared F0 snapshots.
 
-This module never trains probes. It verifies completed native checkpoints,
-calibrates gates from original VQA fit rows only, and exports the shared base.
+Verify completed checkpoints, construct reference gates from fit labels, and
+optionally select the paper's final gates and F1 cutoff on fixed Val.
 """
 from __future__ import annotations
 
@@ -250,7 +250,42 @@ def calibrate(service, z, contract):
     return (np.asarray([result["theta_by_attr"][attr] for attr in attrs], dtype=np.float32),
             np.asarray([result["temperature_by_attr"][attr] for attr in attrs], dtype=np.float32),
             {"protocol": CALIBRATION, "attributeGrid": fitted, "jointOptimization": result,
-             "labelSource": "original-vqa-fit-only", "usesValLabels": False, "usesTestLabels": False})
+              "labelSource": "original-vqa-fit-only", "usesValLabels": False, "usesTestLabels": False})
+
+
+def select_paper_gates(service, z, embeddings, theta, temperature, contract, reference):
+    """Appendix C.4: select one shared gate shift/scale using fixed-Val AP."""
+    source = service.web_root.parents[2] / "probe_learning"
+    if str(source) not in sys.path:
+        sys.path.insert(0, str(source))
+    from src.evaluation.components import select_on_validation
+    config = read(service.web_root.parents[2] / "configs/component_ablation.json")
+    rows = np.asarray(contract["valRows"], dtype=np.int64)
+    if not len(rows) or any(set(rows) & set(contract[key])
+                           for key in ("normalizationRows", "testRows", "queryRows")):
+        raise RuntimeError("Gate selection requires an isolated, nonempty Val")
+    if any(set(rows) & set(target["fitRows"]) for target in contract["targets"].values()):
+        raise RuntimeError("Gate selection Val overlaps probe fitting")
+    labels = np.asarray(contract["targets"]["joint"]["valLabels"], dtype=np.uint8)
+    q = np.asarray(z[rows], dtype=np.float64).mean(axis=2)
+    h = np.asarray(embeddings[rows], dtype=np.float64).mean(axis=1)
+    best, candidates = select_on_validation(q, h, theta, temperature, labels,
+        {"softgate": True, "embedding": True}, config)
+    selected_theta = np.clip(np.asarray(theta, dtype=np.float64) + best["theta_shift"], 0., 1.)
+    selected_temperature = np.minimum(np.asarray(temperature, dtype=np.float64)
+                                     * best["temperature_scale"], config["temperature_cap"])
+    return selected_theta, selected_temperature, {
+        "protocol": VAL_CALIBRATION, "usesValLabels": True, "usesTestLabels": False,
+        "labelSource": contract["labelSource"], "isolationFingerprint": contract["fingerprint"],
+        "referenceCalibration": reference, "referenceTheta": theta.tolist(),
+        "referenceTemperature": temperature.tolist(), "selectionConfig": config,
+        "gateSelection": "fixed-Val Joint AP; beta=1/8,gamma=1,eta=1/2,lambda=1/4",
+        "cutoffSelection": "fixed-Val Joint maximum F1; complete tied-score groups",
+        "thetaShift": best["theta_shift"], "TScale": best["temperature_scale"],
+        "theta": selected_theta.tolist(), "temperature": selected_temperature.tolist(),
+        "classificationThreshold": best["threshold"], "valAp": best["val_ap"],
+        "valF1": best["val_f1"], "valN": len(rows), "valP": int(labels.sum()),
+        "candidates": candidates, "gateArrayEncoding": "<f8"}
 
 
 def _forward_probability_error(actual, expected, *, context: str) -> float:
@@ -434,7 +469,7 @@ def verify_bank(service, task_id: str, directory: Path):
         "fullScoreVerification": "sha256-shape-finite-unit-range-image-method-identity"}
 
 
-def build_task_baseline(service, task_id: str, version: str, bank_directory: Path):
+def build_task_baseline(service, task_id: str, version: str, bank_directory: Path, *, select_on_val=False):
     """Build one verified task without making it active in the website."""
     from tuning_server import WEIGHTED_FUSION_LEARNERS, REFINEMENT_EMBEDDING_METHODS, normalized_ranks
     from tuning_models import unified_weight_scores
@@ -445,7 +480,8 @@ def build_task_baseline(service, task_id: str, version: str, bank_directory: Pat
     destination = parent / task_id
     if destination.exists():
         existing = load_task_baseline(service, task_id, version)
-        if existing is None or existing[1]["bankDirectory"] != bank_directory.name:
+        if (existing is None or existing[1]["bankDirectory"] != bank_directory.name
+                or existing[1].get("calibration", CALIBRATION) != (VAL_CALIBRATION if select_on_val else CALIBRATION)):
             raise RuntimeError("Refusing to overwrite an existing baseline task")
         return existing
     raw, contract, bank_hashes, verification = verify_bank(service, task_id, bank_directory)
@@ -458,6 +494,9 @@ def build_task_baseline(service, task_id: str, version: str, bank_directory: Pat
     embedding_raw = np.column_stack([service._exported_method_column(task, "rawScores", method, task.target_ids.index("joint"))
                                      for method in REFINEMENT_EMBEDDING_METHODS]).astype(np.float32)
     embeddings, embedding_min, embedding_max = minmax(embedding_raw, rows)
+    if select_on_val:
+        theta, temperature, calibration = select_paper_gates(
+            service, z, embeddings, theta, temperature, contract, calibration)
     n, a, _ = z.shape
     output = unified_weight_scores(z, embeddings, np.full((a, 8), 1/8), np.ones(a), np.full(2, .5), .25, theta, temperature)
     columns = [output.final_scores, output.conjunction_scores]
@@ -478,7 +517,7 @@ def build_task_baseline(service, task_id: str, version: str, bank_directory: Pat
     write(temporary / "verification.json", verification)
     files = {path.name: sha(path) for path in temporary.iterdir() if path.is_file()}
     base_fingerprint = digest({"protocol": PROTOCOL, "normalization": normalization, "files": files,
-                               "bankHashes": bank_hashes, "calibration": CALIBRATION})
+                               "bankHashes": bank_hashes, "calibration": calibration["protocol"]})
     metadata = {"schemaVersion": 1, "protocol": PROTOCOL, "version": version, "taskId": task_id,
                 "verified": True, "baseStateFingerprint": base_fingerprint, "rowCount": n,
                 "componentCount": scores.shape[1], "imageIdsSha256": digest(list(service.bundle(task_id).image_ids)),
@@ -488,7 +527,7 @@ def build_task_baseline(service, task_id: str, version: str, bank_directory: Pat
                 "embeddingMethods": list(REFINEMENT_EMBEDDING_METHODS), "normalizationContract": normalization,
                 "bankDirectory": bank_directory.name, "bankFingerprint": digest(bank_hashes), "files": files,
                 "bankTrainingIdentity": verification["bankTrainingIdentity"],
-                "initialModelHoldoutIndependent": True, "calibration": CALIBRATION,
+                "initialModelHoldoutIndependent": not select_on_val, "calibration": calibration["protocol"],
                 "formula": "F=C*((1-lambda)+lambda*H); beta=1/8,gamma=1,eta=1/2,lambda=1/4"}
     # Prepared links do not enable native tuning until the publication pointer
     # switches. Existing bank assets and scores themselves remain unchanged.
@@ -502,6 +541,11 @@ def build_task_baseline(service, task_id: str, version: str, bank_directory: Pat
         raise RuntimeError("Refusing to overwrite another bank/baseline link")
     if not link_path.exists():
         write(link_path, link)
+    if select_on_val:
+        write(temporary / "bank_attestation.json", link)
+        metadata.update(calibrationUsedValidation=True, probeFitExcludesValidation=True,
+                        gateArrayEncoding="<f8", classificationThreshold=calibration["classificationThreshold"],
+                        bankAttestation={"path": "bank_attestation.json", "sha256": sha(temporary / "bank_attestation.json")})
     write(temporary / "manifest.json", metadata)
     os.replace(temporary, destination)
     return load_task_baseline(service, task_id, version)

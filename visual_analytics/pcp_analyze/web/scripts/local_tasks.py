@@ -10,7 +10,8 @@ from pathlib import Path
 import numpy as np
 
 DIRECTORIES = {"cars": "stanford_cars", "hico": "HICO", "celeba": "CelebA"}
-PROTOCOL = "probescout-local-task-v1"
+PROTOCOL = "probescout-local-task-v2"
+SUPPORTED_PROTOCOLS = {"probescout-local-task-v1", PROTOCOL}
 
 
 def read(path):
@@ -27,14 +28,13 @@ def validate_input(path, root):
     from sklearn.model_selection import train_test_split
     path, root = Path(path).resolve(), Path(root).resolve()
     config = read(path)
-    if set(config) != {"name", "dataset", "query_text", "query_images", "attributes", "labels"}:
-        raise ValueError("task.json requires exactly name, dataset, query_text, query_images, attributes, labels")
+    config.pop("query_text", None)  # Accepted only for older input files; text comes from attributes.
+    if set(config) != {"name", "dataset", "query_images", "attributes", "labels"}:
+        raise ValueError("task.json requires name, dataset, query_images, attributes, labels")
     if not isinstance(config["name"], str) or not re.fullmatch(r"[a-z][a-z0-9_]{0,47}", config["name"]):
         raise ValueError("name must be a lowercase slug, at most 48 characters")
     if config["dataset"] not in DIRECTORIES:
         raise ValueError("Supported datasets: cars, hico, celeba")
-    if not isinstance(config["query_text"], str) or not config["query_text"].strip():
-        raise ValueError("query_text must be nonempty")
     attrs = config["attributes"]
     if not isinstance(attrs, list) or not 2 <= len(attrs) <= 5:
         raise ValueError("Use 2 to 5 attributes")
@@ -95,7 +95,7 @@ def validate_input(path, root):
 
 
 def available(service, task_id):
-    return getattr(service.task(task_id), "manifest", {}).get("localTask", {}).get("protocol") == PROTOCOL
+    return getattr(service.task(task_id), "manifest", {}).get("localTask", {}).get("protocol") in SUPPORTED_PROTOCOLS
 
 
 def settings(service, task_id):
@@ -106,7 +106,7 @@ def settings(service, task_id):
     if not path.is_relative_to(allowed) or sha(path) != spec["sha256"]:
         raise RuntimeError("Local task snapshot is missing or changed")
     value = read(path)
-    if value.get("taskId") != task_id or value.get("protocol") != PROTOCOL:
+    if value.get("taskId") != task_id or value.get("protocol") not in SUPPORTED_PROTOCOLS:
         raise RuntimeError("Local task identity mismatch")
     return value
 
@@ -132,7 +132,7 @@ def adapter(service, task_id):
     attrs = config["attributes"]
     return DatasetAdapter(dataset=config["dataset"], task=service.task(task_id).task_name,
         attrs=[a["name"] for a in attrs], key_slugs=[a["id"] for a in attrs],
-        joint_label=config["query_text"], emb_path=processed/"siglip_embedding.npy",
+        joint_label=" and ".join(a["name"] for a in attrs), emb_path=processed/"siglip_embedding.npy",
         patch_path=processed/"siglip_patch_tokens.npy", records=records,
         raw_jsonl_path=service.web_root.parent / "runtime/local-tasks" / task_id / "input.json", vqa_to_key=lambda text: text,
         query_idx=value["queryRows"], raw_images_dir=processed.parent / ("img_celeba" if config["dataset"] == "celeba" else "images"),

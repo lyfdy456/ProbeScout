@@ -52,14 +52,13 @@ No probe retraining is needed for these ablations.
 
 ## Acquisition and other study scopes
 
-`iterative_vqa_runner.py` implements initialization with 100 images and rounds
+`probe_learning/scripts/iterative_vqa_runner.py` implements initialization with 100 images and rounds
 of 40 fitting plus 10 audit images. Acquisition, prefix and budget-training
 helpers remain; trajectories and per-budget contracts are separate assets.
 The paper's fixed budgets are 50, 100, 150, 200 and 300 images.
 
 The 12-query reuse and 10-task exhaustive-VQA studies are distinct cohorts.
-Their standalone study bundles are outside the Table 2/Table 5 entries above;
-do not substitute Main17 or a historical 23/45-task list for them.
+Their standalone study bundles are outside the Table 2/Table 5 entries above.
 
-Historical human-operated feedback comparisons and case replay data are excluded.
-The feedback algorithm/interface remain available for new input.
+The main feedback entry is **Weight Tune / Staged**, with frozen probes and gates.
+**Update Probes** is an optional extension. Historical feedback records are excluded.

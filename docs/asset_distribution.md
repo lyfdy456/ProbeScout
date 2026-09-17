@@ -69,11 +69,11 @@ snapshot_download(
 )
 ```
 
-Merge `artifacts/downloads/features/dataset/` into `<repo>/dataset/`, and
-`artifacts/downloads/probes/visual_analytics/` into `<repo>/visual_analytics/`.
-Preserve internal paths, ordered records and metadata. Keep the downloaded
-`asset_manifest.json` files for checking hashes. To select another dataset,
-change `dataset`; to fetch the full packages, omit `allow_patterns`.
+Move the contents of `artifacts/downloads/features/dataset/` into `dataset/`,
+and `artifacts/downloads/probes/visual_analytics/` into `visual_analytics/`,
+merging matching directories. Moving avoids retaining an extra copy of the large
+arrays. Preserve paths and keep each `asset_manifest.json`. Change `dataset` to
+select another dataset; omit `allow_patterns` to fetch all datasets.
 
 The 60.99 GB CelebA patch NPY is stored as 29 byte-range shards. After downloading
 the CelebA subset, reconstruct it **before merging the dataset tree**:
@@ -86,22 +86,12 @@ The script verifies all shards and the restored NPY, retains the shards and
 refuses to overwrite a differing file. Reconstruction requires another 60.99 GB
 of disk space. Cars and HICO already contain ordinary NPY files.
 
-## Task provenance and exclusions
+## Scope
 
-The task package loader checks the clean manifest SHA-256, task/record identities,
-original VQA source/fit/Val labels, fingerprints and protected partitions.
-Original Val hashes are explicitly retained as **provenance**, while the clean
-files have their own verified hashes. This preserves compatibility with the
-published probe banks without exporting historical feedback exposure records.
+Task packages contain Main17 definitions, original VQA supervision, splits and
+initial evidence. The F0 identifier `f0-val-36-20260908` is historical; the public
+catalog selects 17 tasks. Manifests retain training provenance and payload hashes.
 
-The initial F0 version is `f0-val-36-20260908`; Main17 still selects exactly 17
-tasks. Checkpoints remain immutable. A new training run has a new identity and
-does not replace the published initial ranking automatically.
-
-Historical human annotations, sessions, snapshots, refined models/scores and case
-replay are excluded from both GitHub and HF. Task ZIPs also exclude photographs
-and thumbnails, which are generated locally. Original dataset terms apply.
-
-The separate CLAY/Table 5 evaluation packages are not included in these Web task
-ZIPs. They are needed only for the dedicated full-paper reproduction commands,
-not for launching the interface or using new feedback.
+Original photographs, historical human feedback, sessions and feedback-derived
+models are excluded. Original dataset terms apply. Separate CLAY/Table 5 inputs
+are described in [assets](assets.md); they are not part of the task ZIPs.

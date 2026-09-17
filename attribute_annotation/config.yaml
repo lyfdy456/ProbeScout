@@ -10,8 +10,8 @@ model: "qwen-vl-max"
 # ─────────────────────────────────────────────
 # 数据路径
 # ─────────────────────────────────────────────
-images_dir: "../dataset/raw/SUN/images"
-output_dir: "../outputs/vqa_labels"
+images_dir: "artifacts/my_task/candidates"
+output_dir: "artifacts/my_task/qa"
 
 # ─────────────────────────────────────────────
 # Prompt 模板（单张图片模式）
@@ -59,8 +59,7 @@ prompt: |
   }
 
 # 属性列表（插入到 prompt 的 {attributes} 位置）
-attributes: |
-  (person actively walking across street on marked pedestrian crosswalk, thick white or rainbow-colored parallel stripes marking pedestrian crosswalk, grey asphalt road surface with visible texture and minor cracks)
+attributes: ""  # supplied with --attributes-file
 
 # ─────────────────────────────────────────────
 # 运行参数

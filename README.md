@@ -1,63 +1,25 @@
 # ProbeScout
 
-Visual analytics for attribute-guided image search with reusable attribute probes.
-ProbeScout learns eight probes per attribute from frozen features, combines their
-evidence into a conjunction-aware ranking, and supports interactive refinement.
+Visual analytics for attribute-guided image search. ProbeScout trains eight
+probes per attribute on frozen SigLIP features, combines their evidence, and
+supports interactive inspection and feedback.
 
-**Image visualization requires the original dataset images.** Choose one of
-Cars, HICO-DET or CelebA and place it in the documented relative directory.
-Downloading HF embeddings skips **feature extraction**, not the image download.
-HF packages contain no original photographs or thumbnails.
+## Start with one dataset
 
-## Start here
+Choose Cars, HICO-DET or CelebA. For the Web interface, download the original
+images and the matching [task ZIP](https://huggingface.co/datasets/Ian100/ProbeScout-tasks).
+Follow [manual setup](docs/manual_setup.md) for the image layout and installation.
 
-- [Run one dataset locally](docs/manual_setup.md): manual image layout, task ZIPs,
-  optional HF features, and the commands to open the Web interface.
-- [Workflow](docs/workflow.md): features, training/loading, fusion and feedback.
-- [Create a new task](docs/new_tasks.md): task JSON, supervision CSV, validation,
-  eight-probe training and local Web registration.
-- [Paper-to-code map](docs/paper_method.md): eight probes, Main17, Tables 2 and 5.
-- [Assets](docs/assets.md): required inputs, locations and checksums.
-- [Validation](docs/validation.md): checks performed on this release.
-
-[Main17](manifests/paper_main17.json) contains 7 Cars, 8 HICO-DET and 2 CelebA
-tasks. Initial evidence is pinned to `f0-val-36-20260908`; the historical version
-name does not change the 17-task evaluation scope.
-
-## Install
-
-Python 3.11+ and Node.js 22.13+ are required by the project metadata.
+From the repository root, install dependencies (Python 3.11+, Node.js 22.13+):
 
 ```sh
 uv sync --project probe_learning --locked
 cd visual_analytics/pcp_analyze/web
 npm ci
+cd ../../..
 ```
 
-The Python lock uses CUDA 12.8 PyTorch wheels. The Web launcher finds
-`probe_learning/.venv`; `PROBESCOUT_PYTHON` can select another compatible Python.
-
-## Main commands
-
-Run Python commands from the repository root. Training and evaluation require
-the separate [asset packages](docs/assets.md).
-
-```sh
-# List tasks, probe IDs and seeds without loading assets.
-python scripts/train_probes.py --list
-
-# Check frozen training inputs; add --execute to train.
-uv run --project probe_learning python scripts/train_probes.py --task-id 001_cars_task_bmw_convertible
-
-# Table 2: two embedding baselines, CLAY, eight probes and initial F0.
-uv run --project probe_learning python scripts/evaluate_main17.py --clay /path/to/clay-cache --output outputs/table2
-
-# Table 5: the full model and three component-removal variants.
-uv run --project probe_learning python scripts/evaluate_ablation.py --assets /path/to/evaluation-assets --output outputs/table5
-```
-
-After extracting your selected [task ZIP](https://huggingface.co/datasets/Ian100/ProbeScout-tasks)
-into the repository root and placing original images as documented:
+After extracting the task ZIP into the repository root and placing the images:
 
 ```sh
 uv run --project probe_learning python scripts/prepare_web.py --dataset cars
@@ -65,78 +27,56 @@ cd visual_analytics/pcp_analyze/web
 npm run dev
 ```
 
-Open http://localhost:3000. Select `cars`, `hico`, `celeba`, or multiple datasets.
-Cached browsing and Weight Tune use the task ZIP; native probe updates require
-the matching features and pretrained banks too.
+Open http://localhost:3000. The launcher starts both the Web interface and Python
+API. [Other launch options](visual_analytics/pcp_analyze/web/README.md#launch-options)
+are available.
+
+**Original images are required for photograph previews.** HF embeddings skip
+feature extraction. Cached browsing and **Weight Tune / Staged** need only the
+images and task ZIP; they do not require the large feature or checkpoint downloads.
 
 ## Choose a workflow
 
-| Goal | Entry point | Required assets |
+| Goal | Guide | Additional inputs |
 |---|---|---|
-| Explore saved rankings and give new feedback | Web interface: `npm run dev` | Original images + task ZIP; HF features and pretrained probes additionally needed for probe updates |
-| Try a new query and new attributes | `scripts/custom_task.py` | Original images, ordered records, HF or locally extracted features, task JSON and binary supervision CSV |
-| Train probes from existing features | `scripts/train_probes.py` | Downloaded features, task metadata, original VQA labels and frozen Validation contracts |
-| Start from original images | Feature extraction, then probe training | Dataset images and ordered records, plus the training inputs above |
-| Reproduce paper tables without the interface | `scripts/evaluate_main17.py` and `scripts/evaluate_ablation.py` | Frozen evaluation evidence; CLAY cache for Table 2 |
+| Browse rankings and use paper feedback | [Manual setup](docs/manual_setup.md) | None beyond images + task ZIP |
+| Train a new task | [New tasks](docs/new_tasks.md) | Features, task JSON, per-image labels |
+| Extract features or train Main17 probes | [Workflow](docs/workflow.md) | Features and task training inputs |
+| Update probe weights with feedback | [Workflow](docs/workflow.md#feedback) | Features and matching checkpoint banks |
+| Evaluate paper tables | [Paper-to-code map](docs/paper_method.md) | Separate evaluation inputs described in [assets](docs/assets.md) |
 
-See the [workflow](docs/workflow.md) for the full sequence. The Web interface
-supports a combined development launcher or separate frontend/API processes;
-see [launch options](visual_analytics/pcp_analyze/web/README.md#launch-options).
-Original images are required for photograph previews. HF embeddings can replace
-feature extraction, and `prepare_web.py --without-images` enables numerical use.
-That numerical-only option does not provide the complete image visualization workflow.
+The paper's feedback method is **Weight Tune / Staged**: probes and gates stay
+fixed while fusion weights are refined. **Update Probes** is an optional extension
+that changes the probes.
 
-For a new task on one of the three datasets, use the [input template](examples/custom_task)
-and follow [the new-task guide](docs/new_tasks.md). After filling in your query
-images and labels:
+[Main17](manifests/paper_main17.json) contains 7 Cars, 8 HICO-DET and 2 CelebA tasks.
+The eight probes use five seeds (0–4) and 100 training epochs. See the
+[paper-to-code map](docs/paper_method.md) for configurations and table commands.
 
-```sh
-uv run --project probe_learning python scripts/custom_task.py --task artifacts/my_task/task.json --check
-uv run --project probe_learning python scripts/custom_task.py --task artifacts/my_task/task.json --execute
-```
+## Downloads
 
-The second command trains and exports the task, then adds it to your local Web
-catalog. Restart `npm run dev` to select it. This creates local results; it does
-not upload your labels or change the paper's Main17 definitions.
+- [Tasks and Web evidence](https://huggingface.co/datasets/Ian100/ProbeScout-tasks):
+  dataset-specific ZIPs containing Main17 definitions, original VQA supervision,
+  splits, saved scores and initial fusion.
+- [Features](https://huggingface.co/datasets/Ian100/ProbeScout-features): frozen
+  global embeddings and patch tokens; download only your selected dataset.
+- [Probes](https://huggingface.co/Ian100/ProbeScout-probes): 1,520 checkpoints
+  (38 task-attribute records × 8 methods × 5 seeds) and 304 prediction caches.
+
+[Asset distribution](docs/asset_distribution.md) lists sizes, revisions and subset
+download commands. Historical human feedback and sessions are excluded.
 
 ## Layout
 
 | Directory | Purpose |
 |---|---|
-| `scripts/` | Public paper training, evaluation and release checks |
-| `configs/` | Main17, eight-probe suite, training, ablation and CLAY settings |
-| `probe_learning/src/methods/` | Probes, checkpoint updates, gate calibration |
-| `probe_learning/src/evaluation/` | Shared metrics and component ablations |
-| `probe_learning/scripts/` | Features, acquisition and training/cache utilities |
-| `attribute_annotation/` | Attribute extraction and VQA labeling |
-| `visual_analytics/pcp_analyze/` | One canonical set of score/rank analysis tools |
+| `scripts/` | Training, new tasks, Web preparation and evaluation commands |
+| `configs/` | Paper tasks, probe suite, training and ablation settings |
+| `probe_learning/` | Feature extraction, acquisition, probes and evaluation |
+| `attribute_annotation/` | Attribute TXT extraction and VQA JSONL labeling |
 | `visual_analytics/pcp_analyze/web/` | Fusion, feedback, API and linked views |
-| `manifests/` | Paper scope and immutable asset identities |
+| `manifests/` | Task scope and asset identities |
 
-Historical exploration scripts, unused independent methods and old experiment
-configurations were removed. Numerical and provenance checks remain.
-
-## Publication status
-
-Source, tasks, features and trained probes are hosted in public repositories:
-
-- [Tasks and Web evidence](https://huggingface.co/datasets/Ian100/ProbeScout-tasks):
-  separate Cars, HICO and CelebA ZIPs; definitions, original VQA labels, splits,
-  ordered records and initial Web arrays. No original images or thumbnails.
-- [Features](https://huggingface.co/datasets/Ian100/ProbeScout-features): 81.10 GB,
-  including global features, patch tokens, records and image IDs.
-- [Probes and prediction caches](https://huggingface.co/Ian100/ProbeScout-probes):
-  5.69 GB, including 1,520 checkpoints and 304 frozen score caches.
-
-See [asset distribution](docs/asset_distribution.md) for pinned revisions and
-download commands. Public downloads do not require account authorization.
-The portable task loader verifies the clean VQA exports against frozen bank
-identities. Separate CLAY/Table 5 reproduction inputs are not included in task ZIPs.
-
-Historical human feedback, sessions, feedback-derived models and case replay are
-excluded. The feedback algorithm/interface remain available for new input.
-Original VQA supervision is a separate training asset.
-
-Run `python scripts/check_release.py` to check the source boundary. Original
-dataset terms apply to the corresponding assets; citation metadata remains to
-be finalized.
+See [release validation](docs/validation.md) for checks and tested environments.
+`python scripts/check_release.py` checks source files, configuration and publication
+exclusions. Citation metadata is pending.

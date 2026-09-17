@@ -44,6 +44,7 @@ def create_inputs(value, ids, epochs):
     from local_tasks import PROTOCOL, read, sha
     from val_isolation import digest
     config = value["config"]
+    label = " and ".join(a["name"] for a in config["attributes"])
     identity = digest({**value, "epochs": epochs})[:16]
     task_id = f"local_{config['dataset']}_{config['name']}_{identity}"
     version = f"local-{identity}"
@@ -54,7 +55,7 @@ def create_inputs(value, ids, epochs):
     if path.exists() and read(path) != snapshot:
         raise RuntimeError("Existing local task input differs; use a new task name")
     write(path, snapshot)
-    entry = {"id": task_id, "label": config["query_text"] + " (local)",
+    entry = {"id": task_id, "label": label + " (local)",
              "dataRoot": f"/data/local/{task_id}", "defaultRetrievalTarget": "joint"}
     catalog = {"schemaVersion": 1, "defaultDataset": config["dataset"], "defaultTask": task_id,
                "taskCount": 1, "datasets": [{"id": config["dataset"], "label": config["dataset"].upper(), "tasks": [entry]}]}
@@ -71,7 +72,7 @@ def create_inputs(value, ids, epochs):
             "clusterMethodCount": len(methods)-1, "retrievalTargets": targets,
             "defaultRetrievalTarget": "joint", "defaultRankMethod": "Ours-Full", "files": {},
             "localTask": {"protocol": PROTOCOL, "path": path.relative_to(ROOT).as_posix(), "sha256": sha(path)},
-            "query": {"mode": "fixed", "text": config["query_text"], "images": [
+            "query": {"mode": "fixed", "text": label, "images": [
                 {"imageId": ids[row], "imageIndex": row} for row in value["queryRows"]]}}
         put_json(bundle, manifest, "imageIds", "image-ids.json", ids, len(ids))
         val = np.zeros(len(ids), dtype=np.uint8)
@@ -275,7 +276,7 @@ def main():
         write(bundle / "manifest.json", manifest)
     service = TuningService(WEB, start_worker=False, catalog_path=private/"catalog.json")
     from unified_initial_baseline import build_task_baseline, publish
-    baseline = build_task_baseline(service, task_id, version, bank)
+    baseline = build_task_baseline(service, task_id, version, bank, select_on_val=True)
     export_scores(service, task_id, bundle, baseline)
     export_views(service, task_id, bundle)
     publish(service, version, activate=False)

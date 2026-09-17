@@ -35,17 +35,20 @@ TASKS_DIR = EXPERIMENT_ROOT / "dataset" / "tasks"
 _write_lock = threading.Lock()
 
 
-def load_config(config_path: str = "config.yaml") -> dict:
+def load_config(config_path: str = "config.yaml", *, require_api_key: bool = True) -> dict:
     with open(config_path, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     api_key = config.get("api_key", "")
     if not api_key:
         api_key = os.environ.get("DASHSCOPE_API_KEY", "") or os.environ.get("DEEPSEEK_API_KEY", "")
-    if not api_key:
-        print("[error] API key not found. Set 'api_key' in config.yaml or export DASHSCOPE_API_KEY.")
+    if not api_key and require_api_key:
+        print("[error] Set DASHSCOPE_API_KEY in your environment.")
         sys.exit(1)
     config["api_key"] = api_key
+    for key in ("images_dir", "output_dir", "query_dir", "out_dir"):
+        if config.get(key) and not Path(config[key]).is_absolute():
+            config[key] = str(EXPERIMENT_ROOT / config[key])
     return config
 
 
@@ -252,13 +255,12 @@ def _apply_overrides(config: dict, args) -> None:
     if args.attributes:
         config["attributes"] = args.attributes
     if not config.get("attributes"):
-        print("[warn] no 'attributes' set (config/--task/--attributes all empty); "
-              "prompt {attributes} will be blank")
+        raise SystemExit("[error] Supply --attributes-file, --attributes, or a task with attributes.txt")
 
 
 def main():
     parser = argparse.ArgumentParser(description="VQA Auto-Labeling (API Mode)")
-    parser.add_argument("--config", default="config.yaml", help="config file path")
+    parser.add_argument("--config", default=str(Path(__file__).with_name("config.yaml")), help="config file path")
     parser.add_argument("--task", default=None,
                         help="task dir name (resolved under tasks/<group>/<task>); sets the "
                              "output directory and reads canonical attributes. Images still "
@@ -279,7 +281,7 @@ def main():
     parser.add_argument("--workers", type=int, default=None, help="并发线程数 (>1 启用并发；默认读 config.concurrency 或 1)")
     args = parser.parse_args()
 
-    config = load_config(args.config)
+    config = load_config(args.config, require_api_key=not args.dry_run)
     _apply_overrides(config, args)
     if args.images_manifest:
         payload = json.loads(Path(args.images_manifest).read_text(encoding="utf-8-sig"))

@@ -170,7 +170,7 @@ def _resolve_task_dir(task: str) -> Path:
 
 def main():
     parser = argparse.ArgumentParser(description="3-stage VQA attribute extraction")
-    parser.add_argument("--config", default="config_attributes.yaml")
+    parser.add_argument("--config", default=str(Path(__file__).with_name("config_attributes.yaml")))
     parser.add_argument("--task", default=None,
                         help="task dir name (resolved under tasks/<group>/<task>); overrides "
                              "query_dir/out_dir to <task>/{query_pics, qa}")
@@ -182,7 +182,7 @@ def main():
                         help="reuse existing stage1_descriptions.json; re-run Stage2 + Stage3 only")
     args = parser.parse_args()
 
-    cfg = load_config(args.config)
+    cfg = load_config(args.config, require_api_key=not args.reuse)
     # CLI overrides (priority: --query-dir/--out-dir > --task > config)
     if args.task:
         tdir = _resolve_task_dir(args.task)

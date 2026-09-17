@@ -6,8 +6,8 @@ base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
 model: "qwen-vl-max"
 
 # query 图目录 与 输出目录（默认写到该 task 的 qa/ 下）
-query_dir: "x:/1research/linearprobing/experiment/dataset/tasks/task_bmw_convertible/query pics"
-out_dir: "x:/1research/linearprobing/experiment/dataset/tasks/task_bmw_convertible/qa"
+query_dir: "artifacts/my_task/query_pics"
+out_dir: "artifacts/my_task/qa"
 
 # Stage3 自动筛选参数
 # 硬性规则：属性必须在每张 query 图中都出现（unclear_or_absent_images 为空）；verifiability 必须为 high
