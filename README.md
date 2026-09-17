@@ -1,36 +1,39 @@
 # ProbeScout
 
-Visual analytics for attribute-guided image search. ProbeScout trains eight
-probes per attribute on frozen SigLIP features, combines their evidence, and
-supports interactive inspection and feedback.
+## One-click start (Windows x64)
 
-## One-click local setup
+1. Download the original image archive for **Cars, HICO-DET or CelebA** from the
+   [dataset guide](docs/manual_setup.md#3-place-original-images-for-image-galleries).
+   Leave the dataset archive compressed.
+2. Download and extract [ProbeScout Starter](https://github.com/lyfdy456/ProbeScout/releases/latest/download/ProbeScout-Starter-Windows.zip),
+   or clone this repository, then double-click **`start.bat`**.
+3. Select your dataset and its image archive, then click **Prepare & open**.
 
-On **Windows x64**, download either launcher package and extract it:
+ProbeScout automatically installs the environment, extracts the images, downloads
+the task package and opens the visualization. First launch needs internet access;
+later launches reuse the prepared files.
 
-| Download | Installed for your selected dataset | From a Git clone |
+[Setup details and troubleshooting](docs/launcher.md)
+
+## Starter or Full
+
+| Version | Downloaded on first launch | From a Git clone |
 |---|---|---|
-| [Starter](https://github.com/lyfdy456/ProbeScout/releases/download/v0.3.0-archives/ProbeScout-Starter-Windows.zip) | Task package for browsing and Weight Tune / Staged | Double-click `start.bat` |
-| [Full](https://github.com/lyfdy456/ProbeScout/releases/download/v0.3.0-archives/ProbeScout-Full-Windows.zip) | Task package + features + trained probes | Double-click `start-full.bat` |
+| [Starter](https://github.com/lyfdy456/ProbeScout/releases/latest/download/ProbeScout-Starter-Windows.zip) | Task package for browsing and Weight Tune / Staged | `start.bat` |
+| [Full](https://github.com/lyfdy456/ProbeScout/releases/latest/download/ProbeScout-Full-Windows.zip) | Task package + features + trained probes | `start-full.bat` |
 
-Both ZIPs contain code and a launcher. The selected assets are downloaded from
-HF on first launch; Full does not download all three datasets.
+Both ZIPs contain code and a launcher; assets are downloaded for the selected
+dataset. You can also switch versions on the setup page. Original images provide
+the gallery photographs; HF features let you skip feature extraction.
 
-1. Download the original image archive for Cars, HICO-DET or CelebA using
-   the [dataset guide](docs/manual_setup.md#3-place-original-images-for-image-galleries).
-2. Double-click `start.bat` in the extracted package.
-3. Choose your dataset, select its image archive and an extraction folder, then
-   click **Prepare & open**. An existing image folder can also be used directly.
-
-The launcher installs Python/Node and a CPU environment locally, downloads the
-assets, extracts original images, builds thumbnails and opens the Web interface. Later launches reuse the
-installation. [Setup details and troubleshooting](docs/launcher.md).
-
-**Original images are required for photograph previews.** HF features let you
-skip feature extraction. For other platforms or CUDA training, see
-[manual setup](docs/manual_setup.md).
+The default extraction folder is `dataset/imported/`. You can choose another
+drive, or use an existing image folder. For other platforms or CUDA training,
+see [manual setup](docs/manual_setup.md).
 
 ## Choose a workflow
+
+ProbeScout combines eight attribute probes on frozen SigLIP features for image
+search, visual inspection and interactive feedback.
 
 | Goal | Guide | Additional inputs |
 |---|---|---|
@@ -58,8 +61,8 @@ The eight probes use five seeds (0–4) and 100 training epochs. See the
 - [Probes](https://huggingface.co/Ian100/ProbeScout-probes): 1,520 checkpoints
   (38 task-attribute records × 8 methods × 5 seeds) and 304 prediction caches.
 
-[Asset distribution](docs/asset_distribution.md) lists sizes, revisions and subset
-download commands. Historical human feedback and sessions are excluded.
+[Asset distribution](docs/asset_distribution.md) lists sizes, revisions and manual
+download commands.
 
 ## Layout
 
@@ -74,4 +77,4 @@ download commands. Historical human feedback and sessions are excluded.
 
 See [release validation](docs/validation.md) for checks and tested environments.
 `python scripts/check_release.py` checks source files, configuration and publication
-exclusions. Citation metadata is pending.
+exclusions.

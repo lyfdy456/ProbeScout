@@ -11,8 +11,8 @@ nodejs.org, PyPI, the PyTorch wheel server and Hugging Face.
 | Starter | Main17 tasks, saved rankings, fusion inputs and local thumbnails | `start.bat` |
 | Full | Everything in Starter, plus the selected dataset's embeddings, patch tokens and pretrained probe banks | `start-full.bat` |
 
-Download [Starter](https://github.com/lyfdy456/ProbeScout/releases/download/v0.3.0-archives/ProbeScout-Starter-Windows.zip)
-or [Full](https://github.com/lyfdy456/ProbeScout/releases/download/v0.3.0-archives/ProbeScout-Full-Windows.zip).
+Download [Starter](https://github.com/lyfdy456/ProbeScout/releases/latest/download/ProbeScout-Starter-Windows.zip)
+or [Full](https://github.com/lyfdy456/ProbeScout/releases/latest/download/ProbeScout-Full-Windows.zip).
 Extract the ZIP before running `start.bat`; each package preselects its edition.
 Both download the chosen assets on first launch. A Git clone includes both entry
 points, and the setup page also lets you change editions.
@@ -25,11 +25,12 @@ extension. It installs CPU PyTorch; GPU training uses the separate
 ## Open the workspace
 
 1. Download the [original image archive](manual_setup.md#3-place-original-images-for-image-galleries).
+   Leave it compressed; the launcher extracts and organizes the images.
 2. Double-click the launcher. On first use it prepares a local Python runtime,
    then opens the setup page in your browser.
-3. Select Cars, HICO-DET or CelebA. Under **Original images**, choose
-   **Downloaded archive — extract automatically**, select the archive and choose
-   where to extract it. This can be on another drive.
+3. Select Cars, HICO-DET or CelebA and browse to the downloaded archive.
+   **Extract automatically** is selected by default. Images go into
+   `dataset/imported/`; optionally choose another folder or drive.
 4. Click **Prepare & open**. The page shows download and extraction progress.
    When thumbnails are ready, ProbeScout opens automatically.
 

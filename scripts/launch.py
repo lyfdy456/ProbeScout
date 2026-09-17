@@ -124,10 +124,10 @@ class Installer:
         self.tasks = read(ROOT / "manifests/task_packages.json")
         self.settings = read(LOCAL / "settings.json", {})
         self.verified = read(LOCAL / "verified.json", {})
-        self.state = {"stage": "idle", "message": "Choose a dataset and its image folder.",
+        self.state = {"stage": "idle", "message": "Select your dataset images, then click Prepare & open.",
                       "edition": edition, "dataset": self.settings.get("dataset", "cars"),
                       "imageRoots": self.settings.get("imageRoots", {}),
-                      "imageInputs": self.settings.get("imageInputs", {}), "sourceType": "folder",
+                      "imageInputs": self.settings.get("imageInputs", {}), "sourceType": "archive",
                       "logs": [], "url": None}
         self.lock = threading.Lock()
         self.busy = False

@@ -10,7 +10,7 @@ header{display:flex;align-items:center;gap:12px;margin-bottom:40px}.mark{backgro
 </style>
 <main>
 <header><div class="mark" aria-hidden="true">P</div><div><strong>ProbeScout</strong><br><span>Local workspace</span></div></header>
-<div class="intro"><h1>Your images. Ready to explore.</h1><p>Choose a dataset and its downloaded archive or image folder. ProbeScout prepares the images and opens your visual workspace.</p></div>
+<div class="intro"><h1>Your images. Ready to explore.</h1><p>Select your downloaded dataset archive. ProbeScout extracts the images automatically and opens your visual workspace.</p></div>
 <div class="grid">
 <section class="panel"><h2>1. Choose your installation</h2>
 <form id="setup">
@@ -19,12 +19,12 @@ header{display:flex;align-items:center;gap:12px;margin-bottom:40px}.mark{backgro
 <label class="profile"><input type="radio" name="edition" value="full"><strong>Full</strong><p>Task package, features and trained probes for the selected dataset. Ready for further experiments.</p></label>
 </div>
 <label class="field" for="dataset">Dataset</label><select id="dataset"><option value="cars">Stanford Cars · 7 tasks</option><option value="hico">HICO-DET · 8 tasks</option><option value="celeba">CelebA · 2 tasks</option></select>
-<label class="field" for="sourceType">Original images</label><select id="sourceType"><option value="folder">Already extracted — use an image folder</option><option value="archive">Downloaded archive — extract automatically</option></select>
-<div id="folderFields"><label class="field" for="imageRoot">Image folder</label><div class="path"><input id="imageRoot" type="text" placeholder="Select or paste a folder path" autocomplete="off" spellcheck="false"><button type="button" id="browse" class="secondary">Browse…</button></div></div>
-<div id="archiveFields" hidden>
+<label class="field" for="sourceType">Original images</label><select id="sourceType"><option value="archive" selected>Downloaded archive — extract automatically</option><option value="folder">Already extracted — use an image folder</option></select>
+<div id="folderFields" hidden><label class="field" for="imageRoot">Image folder</label><div class="path"><input id="imageRoot" type="text" placeholder="Select or paste a folder path" autocomplete="off" spellcheck="false"><button type="button" id="browse" class="secondary">Browse…</button></div></div>
+<div id="archiveFields">
 <label class="field" for="archivePath">Downloaded image archive</label><div class="path"><input id="archivePath" type="text" placeholder="ZIP, TAR, TGZ, 7z or .7z.001" autocomplete="off" spellcheck="false"><button type="button" id="browseArchive" class="secondary">Browse…</button></div>
-<label class="field" for="extractTo">Extract into</label><div class="path"><input id="extractTo" type="text" placeholder="dataset/imported (or choose another drive)" autocomplete="off" spellcheck="false"><button type="button" id="browseDestination" class="secondary">Browse…</button></div>
-<p class="hint">A dataset subfolder is created here. Space is checked before extraction; completed images are reused on retry.</p>
+<label class="field" for="extractTo">Extraction folder (optional)</label><div class="path"><input id="extractTo" type="text" placeholder="dataset/imported (or choose another drive)" autocomplete="off" spellcheck="false"><button type="button" id="browseDestination" class="secondary">Browse…</button></div>
+<p class="hint">Leave blank to use dataset/imported. Images are organized automatically; no manual unpacking is needed.</p>
 </div>
 <p class="hint" id="layout"></p>
 <p class="hint"><a href="https://github.com/lyfdy456/ProbeScout/blob/codex/initial-source/docs/manual_setup.md#3-place-original-images-for-image-galleries" target="_blank" rel="noreferrer">Dataset download &amp; layout guide ↗</a></p>
@@ -134,8 +134,10 @@ async function poll() {
     document.querySelectorAll('[data-stage]').forEach(item => {
       const index = order.indexOf(item.dataset.stage);
       item.className = stage === index || (state.stage === 'probes' && item.dataset.stage === 'features') ? 'active' : stage > index ? 'done' : '';
-      item.hidden = (item.dataset.stage === 'features' && serverEdition !== 'full') ||
-        (item.dataset.stage === 'extracting' && state.sourceType !== 'archive');
+      const edition = state.stage === 'idle' ? document.querySelector('[name=edition]:checked').value : serverEdition;
+      const sourceType = state.stage === 'idle' ? $('sourceType').value : state.sourceType;
+      item.hidden = (item.dataset.stage === 'features' && edition !== 'full') ||
+        (item.dataset.stage === 'extracting' && sourceType !== 'archive');
       if (!item.hidden) item.querySelector('.dot').textContent = String(++number);
     });
   } catch (e) { error(`Cannot reach the launcher. Keep its window open or run start.bat again. ${e.message}`); }
