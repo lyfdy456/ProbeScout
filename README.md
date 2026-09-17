@@ -50,6 +50,21 @@ uv run --project probe_learning python scripts/evaluate_ablation.py --assets /pa
 After installing the Web evidence package, run `npm run dev` from
 `visual_analytics/pcp_analyze/web`.
 
+## Choose a workflow
+
+| Goal | Entry point | Required assets |
+|---|---|---|
+| Explore saved rankings and give new feedback | Web interface: `npm run dev` | Web task bundles, initial fusion evidence and compatible Validation contracts; probes/features for probe updates |
+| Train probes from existing features | `scripts/train_probes.py` | Downloaded features, task metadata, original VQA labels and frozen Validation contracts |
+| Start from original images | Feature extraction, then probe training | Dataset images and ordered records, plus the training inputs above |
+| Reproduce paper tables without the interface | `scripts/evaluate_main17.py` and `scripts/evaluate_ablation.py` | Frozen evaluation evidence; CLAY cache for Table 2 |
+
+See the [workflow](docs/workflow.md) for the full sequence. The Web interface
+supports a combined development launcher or separate frontend/API processes;
+see [launch options](visual_analytics/pcp_analyze/web/README.md#launch-options).
+These entry points require the assets listed above; the two available HF packages
+do not yet form a complete portable Web demo.
+
 ## Layout
 
 | Directory | Purpose |
@@ -69,12 +84,19 @@ configurations were removed. Numerical and provenance checks remain.
 
 ## Publication status
 
-Features and trained probes are being uploaded to private Hugging Face review
-repositories; see [asset distribution](docs/asset_distribution.md) for links and
-status. Completed revisions are not yet available. The source repository alone
-does not contain a gallery demo. The prepared evaluation package also excludes
-legacy Validation documents containing historical feedback exposure; its portable
-VQA labels still require an import adaptation for the interactive workflow.
+Features and trained probes are fully uploaded and verified in private Hugging
+Face repositories:
+
+- [Features](https://huggingface.co/datasets/Ian100/ProbeScout-features): 81.10 GB,
+  including global features, patch tokens, records and image IDs.
+- [Probes and prediction caches](https://huggingface.co/Ian100/ProbeScout-probes):
+  5.69 GB, including 1,520 checkpoints and 304 frozen score caches.
+
+See [asset distribution](docs/asset_distribution.md) for pinned revisions and
+download commands. Access currently requires an authorized HF account.
+The separate Web/evaluation evidence package has not been uploaded. Its portable
+VQA labels still require adaptation for the interactive Validation loader;
+legacy documents containing historical feedback exposure are excluded.
 
 Historical human feedback, sessions, feedback-derived models and case replay are
 excluded. The feedback algorithm/interface remain available for new input.

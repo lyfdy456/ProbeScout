@@ -10,6 +10,24 @@ npm run dev
 The launcher starts the Web application and tuning API, using
 `PROBESCOUT_PYTHON`, a project virtual environment, or `python`.
 
+## Launch options
+
+Run these commands from this Web directory, after installing dependencies and
+the required [Web assets](../../../docs/assets.md). The currently published
+HF features/probes are only part of those inputs.
+
+- Combined development launcher: `npm run dev` starts the API on
+  `127.0.0.1:8787`, waits for it, and starts the interface at
+  `http://127.0.0.1:3000`. This is the default local entry point.
+- Separate processes: run `npm run tuning:server` in one terminal and
+  `npm run dev:web` in another. The frontend proxies `/api/tuning` to the API.
+- Build commands: `npm run build` and `npm start` exist for the frontend.
+  `npm start` does not launch the Python API. A complete production deployment
+  also needs API routing and asset/runtime setup; that end-to-end deployment
+  has not been verified in this release.
+
+## Code and checks
+
 - `scripts/tuning_models.py`: initial score and staged weight refinement.
 - `scripts/tuning_supervision.py`: supervision, alignment and merging.
 - `scripts/tuning_server.py`: task/session/job service and HTTP API.

@@ -1,8 +1,9 @@
 # Prepare assets
 
-Private asset uploads are in progress; a fresh clone does not contain the assets.
-See [asset_distribution.md](asset_distribution.md) for repository links, upload
-status, package sizes and the first-preview Validation import limitation.
+The private feature and probe packages are fully uploaded and verified. A fresh
+clone does not contain these assets, and the separate Web/evaluation package
+has not been uploaded. See [asset_distribution.md](asset_distribution.md) for
+download links, pinned revisions, sizes and the interactive Validation limitation.
 
 ## Features and task metadata
 

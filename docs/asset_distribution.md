@@ -1,18 +1,72 @@
 # Asset distribution
 
-GitHub is the source-code repository. Hugging Face is the intended destination for large immutable research assets. Its Hub repositories support ML model and dataset files and versioned revisions: https://huggingface.co/docs/hub/repositories . Storage depends on account policy: https://huggingface.co/docs/hub/storage-limits .
+GitHub contains source, configuration, dependency locks, paper scope and core
+tests. Large immutable features, checkpoints and prediction caches are hosted
+separately on Hugging Face.
 
-| Destination | Proposed content | Observed primary-file size |
-|---|---|---:|
-| GitHub | Source, locks, configuration, paper scope, metadata and download/checksum scripts | Small source files |
-| Hugging Face model repository | Main17 pretrained probes; 1,520 seed checkpoints and associated metadata | 5.35 GB weights |
-| Hugging Face dataset repository | SigLIP global features, records and image-ID alignment, grouped by dataset | 0.82 GB arrays |
-| Hugging Face dataset repository | SigLIP patch features, grouped by dataset and sharded for selective download | 80.25 GB arrays |
-| Hugging Face dataset repository | Frozen, pre-human-feedback probe scores and initial evidence | 0.314 GB probe caches plus other evidence |
+## Available packages
 
-These are decimal GB from the local inventory, not final compressed package sizes. Keep global and patch features separate. Preserve float32 global features, float16 patch tokens, image order, and the current float64 gate parameters. Feature shards should carry row ranges and SHA-256 values.
+Both private packages are fully uploaded. The upload process verified all
+packaged remote file hashes; the pinned revisions were checked again on
+2026-09-17. Sizes below are decimal GB, without compression.
 
-Private review uploads have started under `Ian100`: [ProbeScout-probes](https://huggingface.co/Ian100/ProbeScout-probes) and [ProbeScout-features](https://huggingface.co/datasets/Ian100/ProbeScout-features). Uploads are not yet complete. Each package has an explicit SHA-256 manifest; completed revisions will be recorded after remote verification. The separate Main17 evidence package is prepared locally and awaits additional-data upload authorization. Licensing and public redistribution metadata remain pending. Pin an immutable completed revision instead of relying on a moving `main` or `latest` pointer.
+| Package | Contents | Size | Pinned revision |
+|---|---|---:|---|
+| [ProbeScout-probes](https://huggingface.co/Ian100/ProbeScout-probes) | 1,520 checkpoints, 304 frozen prediction caches, training and isolation metadata | 5.69 GB | `3d8fbdcc9921c0a3a20e2c8cbd0cd102b124d904` |
+| [ProbeScout-features](https://huggingface.co/datasets/Ian100/ProbeScout-features) | Cars, HICO and CelebA SigLIP global features, patch tokens, records and image IDs | 81.10 GB | `3ef237a82d0c738a159aa49bb86764732d331265` |
+
+These are private review repositories: an authorized HF account is required.
+Each package includes `asset_manifest.json` with paths, sizes and SHA-256 values.
+The model package has 2,199 packaged files (5,694,587,019 bytes); the feature
+package has 44 (81,101,385,535 bytes). The Hub also adds a `.gitattributes` file
+to each repository, outside those package counts.
+
+## Download
+
+Use an environment with `huggingface_hub` installed and authenticate locally
+with `hf auth login`. Do not put an access token in source code. From the
+ProbeScout repository root, run the following Python in that environment:
+
+```python
+from huggingface_hub import snapshot_download
+
+snapshot_download(
+    repo_id="Ian100/ProbeScout-probes",
+    repo_type="model",
+    revision="3d8fbdcc9921c0a3a20e2c8cbd0cd102b124d904",
+    local_dir="artifacts/downloads/probes",
+)
+
+# Optional: this downloads the full 81.10 GB feature package.
+snapshot_download(
+    repo_id="Ian100/ProbeScout-features",
+    repo_type="dataset",
+    revision="3ef237a82d0c738a159aa49bb86764732d331265",
+    local_dir="artifacts/downloads/features",
+)
+```
+
+Merge the downloaded probe package's `visual_analytics/` directory into the code
+root, preserving its internal paths. The feature package has its own
+`dataset/raw/` tree; use it within the prepared `EXPERIMENT_ROOT` described in
+[assets.md](assets.md). Keep the package manifests for verification.
+
+To fetch only one dataset, add an `allow_patterns` list to the feature download,
+for example `['dataset/raw/stanford_cars/**', 'asset_manifest.json', 'README.md']`.
+Cached ranking display does not require downloading all patch features; feature
+extraction and probe training/update have their own input requirements.
+
+The 60.99 GB CelebA patch NPY is stored as 29 byte-range shards. After downloading
+all feature files, reconstruct it with the script included in that HF package:
+
+```sh
+python artifacts/downloads/features/restore_patch_features.py --root artifacts/downloads/features
+```
+
+The script verifies each shard and the reconstructed file. It preserves the
+original NPY bytes, dtype, shape and row order, retains the shards, and refuses
+to overwrite a differing file. Reconstruction needs another 60.99 GB of free
+disk space. Cars and HICO arrays retain their original NPY files.
 
 ## Publication selection
 
@@ -22,10 +76,16 @@ Human feedback is excluded from GitHub **and** Hugging Face: no annotations, use
 
 Every downloadable file should identify its relative path, bytes, SHA-256, artifact type, dataset/gallery identity, feature identity, training/split/calibration provenance, dependency IDs, Hugging Face repository type/ID/revision, and license. Keep data paths separate from public source paths; do not change original artifact hashes to match renamed code.
 
-## First-preview boundary
+## What remains for a portable Web system
+
+The separate Main17 Web/evaluation package is prepared locally but has not
+been uploaded; there is no published HF link for it yet. It contains the task
+catalog and bundles, initial fusion evidence, evaluation inputs, original VQA
+labels and query/thumbnail images. Its upload awaits authorization for those
+additional assets. The two available packages above do not supply all of this.
 
 The original fixed-VQA Validation documents contain historical feedback exposure rows and overlap statistics. Those legacy documents are excluded from the first evidence package. A separate portable label export retains original VQA source/fit/Validation labels and memberships without feedback history. It does not yet replace the legacy interactive Validation loader. The prepared package has been checked with the frozen offline evaluation commands: all 204 Table 2 rows and 68 Table 5 rows match the prior verified results.
 
-## Verified model snapshot
-
-The private model package is fully uploaded and its remote hashes have been verified: `Ian100/ProbeScout-probes`, revision `3d8fbdcc9921c0a3a20e2c8cbd0cd102b124d904` (2,199 files including metadata, 5,694,587,019 bytes). It includes all 1,520 checkpoints and 304 score caches. Global feature arrays and indexes have been uploaded; patch features are incomplete. The upload endpoint rejected the 60.99 GB CelebA file because its per-file limit is 50 GB, so it is being uploaded as byte-range shards with an exact reconstruction script.
+Uploading the evidence alone would not complete the interactive loader
+adaptation. The two available HF packages do not yet form an asset-complete
+portable Web demo.
