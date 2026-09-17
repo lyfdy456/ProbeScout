@@ -3,6 +3,10 @@
 Commands run from the repository root unless stated otherwise. See
 [manual_setup.md](manual_setup.md) for manual downloads, relative image paths,
 task ZIP extraction and Web launch. Install only the datasets you need.
+Original images are required for image galleries and query previews. HF
+embeddings skip extraction, not the download of those images. For a new query
+or new attributes, follow [New tasks](new_tasks.md); `train_probes.py` below is
+the entry point for the published Main17 tasks.
 
 ## 1. Extract or load frozen features
 

@@ -86,6 +86,7 @@ export interface TopGalleryProps {
   annotationDisabledReason?: (item: GalleryItem) => string;
   /** Original VQA label for the active Retrieval target; null means not selected by VQA. */
   getOriginalVqaLabel?: (item: GalleryItem) => OriginalVqaLabel | null | undefined;
+  supervisionLabel?: string;
   /** Model-only per-attribute calibrated strengths for this image. */
   getAttributeStrengths?: (item: GalleryItem) => readonly AttributeStrengthPoint[];
   attributeStrengthSourceLabel?: string;
@@ -314,6 +315,7 @@ export function TopGallery({
   canAnnotate,
   annotationDisabledReason,
   getOriginalVqaLabel,
+  supervisionLabel = "VQA",
   getAttributeStrengths,
   attributeStrengthSourceLabel,
   onItemSelect,
@@ -565,14 +567,14 @@ export function TopGallery({
                         className={`gallery-original-vqa-badge gallery-original-vqa-${
                           originalVqaLabel === 1 ? "positive" : "negative"
                         }`}
-                        aria-label={`Existing VQA supervision: ${
+                        aria-label={`Existing ${supervisionLabel} supervision: ${
                           originalVqaLabel === 1 ? "positive" : "negative"
                         }`}
-                        title={`Existing VQA supervision: ${
+                        title={`Existing ${supervisionLabel} supervision: ${
                           originalVqaLabel === 1 ? "positive" : "negative"
                         }`}
                       >
-                        <span aria-hidden="true">VQA {originalVqaLabel === 1 ? "✓" : "✕"}</span>
+                        <span aria-hidden="true">{supervisionLabel} {originalVqaLabel === 1 ? "✓" : "✕"}</span>
                       </span>
                     )}
                     {evaluationPositive && (
@@ -622,6 +624,7 @@ export function TopGallery({
           feedbackBusy={lightboxFeedbackSaving}
           feedbackStatus={lightboxFeedbackStatus}
           getOriginalVqaLabel={getOriginalVqaLabel}
+          supervisionLabel={supervisionLabel}
           getAttributeStrengths={getAttributeStrengths}
           attributeStrengthSourceLabel={attributeStrengthSourceLabel}
           renderFeedback={(item) => renderPreferenceControls(

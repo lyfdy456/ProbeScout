@@ -80,6 +80,12 @@ def active_info(service) -> dict | None:
 
 def _task_metadata(service, task_id: str, version: str | None = None, *, fingerprint: str | None = None):
     service.task(task_id)
+    import local_tasks
+    if local_tasks.available(service, task_id):
+        expected = local_tasks.settings(service, task_id)["version"]
+        if version is not None and version != expected:
+            raise RuntimeError("Local task baseline version differs from its immutable input")
+        version = expected
     from experimental_parent_overlay import applies, metadata as overlay_metadata
     if applies(task_id):
         return overlay_metadata(service, task_id, version, fingerprint=fingerprint)
@@ -331,7 +337,7 @@ def verify_bank(service, task_id: str, directory: Path):
     from src.methods.native_probe_update import _load_base, score_native_probe
     adapter = service._tuning_source_context(task_id).adapter
     with service._weighted_fusion_context_guard:
-        harness.configure(contract["dataset"], contract["taskName"])
+        harness.configure(contract["dataset"], contract["taskName"], adapter=adapter)
         paths = bank.database_paths(adapter)
         emb, _ = harness.load_backbone_embeddings(adapter, "siglip")
         patches, patch_meta = harness.load_backbone_patches(adapter, "siglip")
@@ -501,7 +507,7 @@ def build_task_baseline(service, task_id: str, version: str, bank_directory: Pat
     return load_task_baseline(service, task_id, version)
 
 
-def publish(service, version: str):
+def publish(service, version: str, *, activate: bool = True):
     """One pointer update after every task passes; no partial-task publication."""
     directory = version_directory(service, version)
     tasks = {}
@@ -528,10 +534,11 @@ def publish(service, version: str):
         raise RuntimeError("Published baseline manifest cannot be overwritten")
     if not path.exists():
         write(path, manifest)
-    pointer = root_path(service) / "active.json"
-    temporary = pointer.with_name(f".active.{uuid.uuid4().hex}.pending")
-    write(temporary, {"version": version, "manifestSha256": sha(path)})
-    os.replace(temporary, pointer)
+    if activate:
+        pointer = root_path(service) / "active.json"
+        temporary = pointer.with_name(f".active.{uuid.uuid4().hex}.pending")
+        write(temporary, {"version": version, "manifestSha256": sha(path)})
+        os.replace(temporary, pointer)
     return manifest
 
 

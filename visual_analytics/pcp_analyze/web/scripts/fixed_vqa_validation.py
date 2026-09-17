@@ -67,6 +67,7 @@ def _version(value: str) -> str:
 def _baseline_source(service: Any, task_id: str) -> dict:
     """Bind row identities and exclusion boundaries without reading public GT."""
     task = service.task(task_id)
+    import local_tasks
     bundle = service.bundle(task_id)
     if len(bundle.image_ids) != task.row_count or len(set(bundle.image_ids)) != task.row_count:
         raise RuntimeError("Fixed VQA Validation requires unique aligned image IDs")
@@ -82,7 +83,7 @@ def _baseline_source(service: Any, task_id: str) -> dict:
         "validationMaskSha256": _sha(bytes(bundle.validation_mask)),
         "testMaskSha256": _sha(bytes(bundle.test_mask)),
         "querySha256": _sha(_json(sorted(int(row) for row in bundle.query_indices))),
-        "evaluationLabelSource": "original-vqa-supervision",
+        "evaluationLabelSource": "user-provided-supervision" if local_tasks.available(service, task_id) else "original-vqa-supervision",
         "usesPublicGroundTruth": False,
     }
 
@@ -155,7 +156,7 @@ def _target_document(task_id: str, target_id: str, target_kind: str,
         "targetId": target_id, "targetKind": target_kind,
         "seed": 0, "validationFraction": 0.2,
         "selectionTargetId": "joint", "selection": selection,
-        "evaluationLabelSource": "original-vqa-supervision",
+        "evaluationLabelSource": original["audit"].get("labelSource", "original-vqa-supervision"),
         "usesPublicGroundTruth": False,
         "fitProtocol": "original-vqa-minus-shared-validation-v1",
         "sourceSupervisionHash": original["audit"]["recoveredSupervisionHash"],
@@ -235,7 +236,7 @@ def active_vqa_validation_info(service: Any) -> dict | None:
             "referenceOnly": True}
 
 
-def freeze_vqa_validation(service: Any, version: str) -> dict:
+def freeze_vqa_validation(service: Any, version: str, *, activate: bool = True) -> dict:
     """Explicitly create a new immutable version, then atomically activate it."""
     version = _version(version)
     root = service.vqa_validation_root
@@ -314,16 +315,23 @@ def freeze_vqa_validation(service: Any, version: str) -> dict:
     for task_id, task in service.tasks.items():
         for target_id in task.target_ids:
             load_vqa_validation_split(service, task_id, target_id, version)
-    _write(root / "active.json", {
-        "schemaVersion": SCHEMA_VERSION, "version": version,
-        "manifestSha256": manifest_hash, "activatedAt": created_at,
-    })
+    if activate:
+        _write(root / "active.json", {
+            "schemaVersion": SCHEMA_VERSION, "version": version,
+            "manifestSha256": manifest_hash, "activatedAt": created_at,
+        })
     return manifest
 
 
 def load_vqa_validation_split(service: Any, task_id: str, target_id: str,
                               version: str | None = None) -> Any:
     """Read fixed members and revalidate source/fit/label identities, never split."""
+    import local_tasks
+    if local_tasks.available(service, task_id):
+        expected = local_tasks.settings(service, task_id)["version"]
+        if version is not None and version != expected:
+            raise RuntimeError("Local task Val version differs from its immutable input")
+        version = expected
     import portable_tasks
     if portable_tasks.available(service, task_id):
         return portable_tasks.validation_split(service, task_id, target_id, version)

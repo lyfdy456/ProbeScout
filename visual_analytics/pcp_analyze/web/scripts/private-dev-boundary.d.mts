@@ -1,4 +1,4 @@
 import type { Plugin } from "vite";
 
-export function isPrivateDevRequest(rawUrl: unknown): boolean;
-export function privateDevBoundary(): Plugin;
+export function isPrivateDevRequest(rawUrl: unknown, publicModuleUrls?: string[]): boolean;
+export function privateDevBoundary(publicModuleUrls?: string[]): Plugin;

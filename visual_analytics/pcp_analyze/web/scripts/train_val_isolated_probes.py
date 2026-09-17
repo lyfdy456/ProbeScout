@@ -35,13 +35,21 @@ def main() -> None:
         value, contract, _ = portable_tasks.document(service, args.task_id)
         if build_task_contract(service, args.task_id, value["validationProvenance"]["version"]) != contract:
             raise RuntimeError("Portable training contract differs from the installed task")
-    context = service._tuning_source_context(args.task_id)
+    train_task(service, args.task_id, contract, epochs=args.epochs, execute=args.execute)
+
+
+def train_task(service, task_id, contract, *, epochs=100, execute=False):
+    """Train an audited task using the shared eight-method, five-seed runner."""
+    if epochs < 1:
+        raise ValueError("epochs must be positive")
+    web = service.web_root
+    context = service._tuning_source_context(task_id)
     adapter = context.adapter
     records = adapter.records.sort_values("embedding_index")
     if records["embedding_index"].astype(int).tolist() != list(range(len(records))):
         raise RuntimeError("Offline records are not in contiguous embedding order")
     paths = records["relative_path"].astype(str).tolist()
-    inputs = materialize_training_inputs(contract, list(service.bundle(args.task_id).image_ids), paths)
+    inputs = materialize_training_inputs(contract, list(service.bundle(task_id).image_ids), paths)
     source_root = web.parents[2] / "probe_learning"
     # Bind trainer code as well as data; no resume across changed implementations.
     source_files = sorted((source_root / "src" / "methods").glob("*.py")) + [
@@ -51,16 +59,16 @@ def main() -> None:
     ]
     code_sha = digest([[str(path.relative_to(web.parents[2])), hashlib.sha256(path.read_bytes()).hexdigest()]
                        for path in source_files])
-    identity = {"protocol": "val-isolated-probebank-v1", "taskId": args.task_id,
-                "isolationFingerprint": contract["fingerprint"], "epochs": args.epochs,
+    identity = {"protocol": "val-isolated-probebank-v1", "taskId": task_id,
+                "isolationFingerprint": contract["fingerprint"], "epochs": epochs,
                 "seeds": list(SEEDS), "methods": list(METHODS), "trainerSha256": code_sha}
-    output = web.parent / "runtime" / "isolated-probes" / args.task_id / digest(identity)
-    print(json.dumps({"taskId": args.task_id, "fitCount": len(inputs["fit_paths"]),
+    output = web.parent / "runtime" / "isolated-probes" / task_id / digest(identity)
+    print(json.dumps({"taskId": task_id, "fitCount": len(inputs["fit_paths"]),
                       "valCount": len(inputs["val_labels"]), "seeds": list(SEEDS),
                       "normalizationCount": len(inputs["normalization_indices"]),
-                      "output": str(output), "execute": args.execute}, ensure_ascii=False), flush=True)
-    if not args.execute:
-        return
+                      "output": str(output), "execute": execute}, ensure_ascii=False), flush=True)
+    if not execute:
+        return output
     # Imports above use metadata only. Heavy features/training begin solely here.
     for path in (source_root, source_root / "scripts"):
         if str(path) not in sys.path:
@@ -82,7 +90,7 @@ def main() -> None:
     harness.configure(contract["dataset"], contract["taskName"], adapter=adapter)
     if list(harness.ATTRS) != [attr["name"] for attr in contract["attributes"]]:
         raise RuntimeError("Adapter attribute identity changed")
-    harness.EPOCHS = args.epochs
+    harness.EPOCHS = epochs
     bank.BACKBONE = "siglip"
     emb, _ = harness.load_backbone_embeddings(adapter, "siglip")
     patches, patch_meta = harness.load_backbone_patches(adapter, "siglip")
@@ -97,14 +105,14 @@ def main() -> None:
             cached = bank.read_cache(
                 output, contract["dataset"], contract["taskName"], "val_isolated",
                 method, attr, emb, paths, list(SEEDS), supervision_digest,
-                args.epochs, feature_context=feature_context, cache_identity=cache_identity,
+                epochs, feature_context=feature_context, cache_identity=cache_identity,
             )
             if cached is None:
                 cached = bank.train_cache_entry(
                     output, contract["dataset"], contract["taskName"], "val_isolated",
                     method, attr, emb, paths, adapter.p2i, inputs["train_pool"],
                     inputs["fit_paths"], inputs["fit_labels"], list(SEEDS),
-                    supervision_digest, args.epochs, patches=patches, text_query=text_query,
+                    supervision_digest, epochs, patches=patches, text_query=text_query,
                     feature_context=feature_context, cache_identity=cache_identity,
                     validation_labels=inputs["val_labels"],
                 )
@@ -118,6 +126,8 @@ def main() -> None:
     fixed._write(output / "isolation_contract.json", contract)
     fixed._write(output / "complete.json", {**identity, "modelsRetrained": True,
                                             "published": False})
+
+    return output
 
 
 if __name__ == "__main__":

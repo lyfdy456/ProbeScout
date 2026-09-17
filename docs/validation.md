@@ -1,5 +1,26 @@
 # Release validation
 
+## New-task workflow, 2026-09-17
+
+The new `custom_task.py` entry was exercised in an isolated source copy against
+the real Cars gallery: 16,185 images, 220 supplied original labels, 176 fit rows
+and 44 fixed Val rows. All eight methods and five seeds trained for one epoch
+on two attributes (80 checkpoints). Checkpoint verification, initial fit-only
+fusion, image atlases, PCA/UMAP, clustering and local catalog registration passed.
+Large source features were linked from existing local assets, not copied or uploaded.
+
+A real browser loaded the new task's query photographs, gallery, SigLIP UMAP,
+initial F0 and diagnostics with no failed requests or script errors. No Frozen
+Test option was exposed. Weight Tune completed against the 44 Val examples,
+and a separate one-attribute native update completed for all eight methods and
+five seeds. The completed task could be enabled again without retraining.
+These are pipeline checks, not accuracy claims from a full 100-epoch run.
+
+The existing Main17 Cars page also passed a browser regression check. The
+production Web build and TypeScript check passed using the existing compatible
+dependencies. The new task path has not been trained end-to-end on HICO or
+CelebA; their shared adapter inputs remain covered by the earlier package checks.
+
 ## Portable setup, 2026-09-17
 
 An isolated copy of the source was populated from the three task ZIPs, with no
@@ -26,16 +47,16 @@ The immutable revision is pinned in `manifests/task_packages.json`.
 
 ## Core tests
 
-The release retains 26 test files and two support files, reduced from 104 test
-and support files. Two focused checks cover portable labels and browser-module
-access. These are executable correctness checks, not
+The release retains 27 test files and two support files, reduced from 104 test
+and support files. Focused checks cover portable labels, user task inputs,
+holdout isolation and browser-module access. These are executable correctness checks, not
 experiment results. Tests generate synthetic data and temporary models; running
 the application does not require running the tests.
 
 | Suite | Test files | Latest result | Coverage |
 |---|---:|---|---|
 | Probe learning | 7 | 38 passed | Eight probe implementations, checkpoint loading, fixed holdouts, gate calibration, supervision merging, Main17/ablation entries and credential exclusions |
-| Web backend | 10 | 81 passed | Fusion/feedback, portable labels, frozen gates/Val, probe snapshots and session isolation |
+| Web backend | 11 | 86 passed | Fusion/feedback, portable and local task inputs, frozen gates/Val, probe snapshots and session isolation |
 | Frontend | 8 | 37 passed | Score/weight alignment, Development/Frozen Test separation and browser-module access |
 | Optional Main17 assets | 1 | Passed for all 17 local task bundles | Binary checksums, image IDs, attribute order and fixed queries |
 
@@ -104,7 +125,10 @@ Validation cutoff, and score-vector SHA-256 matched the original results exactly
 Full-model macro Test AP is `0.8320685393249247`; Gallery AP is
 `0.8232782494346567`. Both commands save Validation choices before evaluation.
 
-## Scope of these checks
+## Scope of the earlier paper-cleanup checks
+
+This subsection records the earlier cleanup only. The portable Web and new-task
+checks at the top of this page were performed subsequently.
 
 Python and Node checks used existing compatible local dependency installations.
 The retained suites passed again after the reduction (38 learning, 79 backend,

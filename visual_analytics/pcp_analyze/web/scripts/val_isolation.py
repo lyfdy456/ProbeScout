@@ -94,7 +94,7 @@ def build_task_contract(service: Any, task_id: str, val_version: str) -> dict:
         "attributes": [{"id": target["id"], "name": name}
                        for target, name in zip(attributes, context.attributes, strict=True)],
         "methods": list(METHODS), "seeds": list(SEEDS),
-        "labelSource": "original-vqa-supervision", "usesPublicGroundTruth": False,
+        "labelSource": joint.audit.get("evaluationLabelSource", "original-vqa-supervision"), "usesPublicGroundTruth": False,
         "trainingPolicy": "fit-only-minibatches; fixed-Val-checkpoint-selection",
         "unlabeledPolicy": "trainPool-minus-all-original-supervised-fit-images",
         "normalizationPolicy": "static-Development-minus-Val-Test-Query",

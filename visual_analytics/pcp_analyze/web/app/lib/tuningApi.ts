@@ -474,7 +474,7 @@ export interface FixedVqaValidationResponse {
   rowIndices: number[];
   count: number;
   protocol: string;
-  labelSource: "original-vqa-supervision";
+  labelSource: "original-vqa-supervision" | "user-provided-supervision";
   initialModelHoldoutIndependent: false;
   referenceOnly?: true;
 }

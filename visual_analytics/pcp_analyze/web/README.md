@@ -16,6 +16,9 @@ Run these commands from this Web directory, after installing dependencies and
 the required [task ZIP and local images](../../../docs/manual_setup.md).
 The task ZIP supplies saved rankings and Weight Tune inputs; matching HF features
 and checkpoints additionally enable native probe updates.
+Original images are required for galleries even when using HF embeddings.
+For your own query/attributes, follow [New tasks](../../../docs/new_tasks.md)
+to supply the JSON/CSV inputs, train and register a local task before launching.
 
 - Combined development launcher: `npm run dev` starts the API on
   `127.0.0.1:8787`, waits for it, and starts the interface at

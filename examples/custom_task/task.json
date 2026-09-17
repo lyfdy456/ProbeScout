@@ -1,0 +1,11 @@
+{
+  "name": "red_convertible",
+  "dataset": "cars",
+  "query_text": "a red convertible car",
+  "query_images": [],
+  "attributes": [
+    {"id": "red", "name": "Red body color"},
+    {"id": "convertible", "name": "Convertible body type"}
+  ],
+  "labels": "labels.csv"
+}

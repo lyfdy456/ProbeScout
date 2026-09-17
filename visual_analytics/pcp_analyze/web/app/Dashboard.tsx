@@ -272,6 +272,7 @@ interface DatasetCatalog {
 
 interface DashboardManifest {
   schemaVersion: number;
+  localTask?: { protocol: string };
   rowCount: number;
   methodCount: number;
   targetCount: number;
@@ -296,7 +297,7 @@ interface DashboardManifest {
     pca2d: FileSpec;
     umap2d?: FileSpec;
     metrics: FileSpec;
-    groundTruth: FileSpec;
+    groundTruth?: FileSpec;
     developmentMask: FileSpec;
     validationMask: FileSpec;
     testMask: FileSpec;
@@ -514,7 +515,9 @@ async function loadDashboardDataset(
       ),
       fetchBuffer(dataPath(root, files.pca2d.path), signal),
       fetchBuffer(dataPath(root, files.metrics.path), signal),
-      fetchBuffer(dataPath(root, files.groundTruth.path), signal),
+      files.groundTruth
+        ? fetchBuffer(dataPath(root, files.groundTruth.path), signal)
+        : Promise.resolve(new ArrayBuffer(0)),
       fetchBuffer(dataPath(root, files.developmentMask.path), signal),
       fetchBuffer(dataPath(root, files.validationMask.path), signal),
       fetchBuffer(dataPath(root, files.testMask.path), signal),
@@ -546,6 +549,11 @@ async function loadDashboardDataset(
     testMask: new Uint8Array(testMask),
   };
 
+  if (!files.groundTruth && (dataset.testMask.some(Boolean)
+      || manifest.evaluation.scopes.some((scope) => scope.id === "test"))) {
+    throw new Error("Frozen Test requires independent ground-truth labels.");
+  }
+
   if (
     dataset.imageIds.length !== manifest.rowCount ||
     manifest.retrievalTargets.length !== manifest.targetCount ||
@@ -558,7 +566,7 @@ async function loadDashboardDataset(
     )) ||
     dataset.pca2d.length !== manifest.rowCount * 2 ||
     dataset.metrics.length !== manifest.files.metrics.shape.reduce((size, value) => size * value, 1) ||
-    dataset.groundTruth.length !== manifest.rowCount * manifest.targetCount ||
+    dataset.groundTruth.length !== (files.groundTruth ? manifest.rowCount * manifest.targetCount : 0) ||
     dataset.developmentMask.length !== manifest.rowCount ||
     dataset.validationMask.length !== manifest.rowCount ||
     dataset.testMask.length !== manifest.rowCount
@@ -2190,7 +2198,7 @@ export function Dashboard() {
   const activeTunedRanking = activeFusionTuneRanking ?? activeTargetTunedRanking;
 
   const validationComparisonRows = useMemo<ValidationComparisonRow[]>(() => {
-    if (!dataset || !validationMode) return [];
+    if (!dataset || !validationMode || !dataset.manifest.files.groundTruth) return [];
     const currentTargetIndex = targetIndex.get(retrievalTarget);
     if (currentTargetIndex === undefined) return [];
     const rows: ValidationComparisonRow[] = dataset.manifest.methods.map((method, index) => {
@@ -3605,6 +3613,7 @@ export function Dashboard() {
             canAnnotate={canAnnotate}
             annotationDisabledReason={annotationDisabledReason}
             getOriginalVqaLabel={getOriginalVqaLabel}
+            supervisionLabel={dataset.manifest.localTask ? "Label" : "VQA"}
             getAttributeStrengths={getAttributeStrengths}
             attributeStrengthSourceLabel={attributeStrengthSourceLabel}
             onItemSelect={(item) => setSelectedId(item.id)}

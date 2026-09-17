@@ -4,6 +4,17 @@ Choose Cars, HICO-DET, CelebA, or any combination. You do not need all three.
 Download files yourself, place them at the paths below, then run the preparation
 and launch commands. No VQA API key is needed to use the published tasks.
 
+**Both feature routes require original images for the full Web visualization:**
+
+| Route | Download/place original images | Feature extraction |
+|---|---|---|
+| Use HF embeddings | Required | Skipped; download matching global and patch features |
+| Compute embeddings locally | Required | Run the two extraction commands in step 5 |
+
+For browsing the published tasks and Weight Tune, the task ZIP already contains
+the scores and projections: neither feature extraction nor the large feature
+download is needed. You still need original images for galleries and previews.
+
 ## 1. Install the code dependencies
 
 From the cloned repository root:
@@ -101,7 +112,7 @@ exactly those installed datasets. Rerun preparation and restart the app when
 changing the selection. `--check-only` verifies inputs without generating files;
 `--force-atlases` regenerates thumbnails after replacing images.
 
-The task package is enough for saved rankings, scatterplots, parallel coordinates,
+Together with your original images, the task package is enough for saved rankings, scatterplots, parallel coordinates,
 new feedback and **Weight Tune**. It contains the initial probe scores and fusion
 inputs, so this path does not require loading every checkpoint or patch feature.
 Development shows Val metrics; Frozen Test evaluation stays in its separate view.
@@ -114,6 +125,7 @@ patch tokens. Download only your selected dataset from
 then merge its `dataset/` tree into the repository root. See the exact
 [subset download commands](asset_distribution.md#download-features-and-probes).
 For CelebA, reconstruct the sharded patch file with the package's restore script.
+These features replace extraction only; keep the original image directories from step 3.
 
 Alternatively, after installing images and the task ZIP, extract features:
 
@@ -147,3 +159,12 @@ If you only need numerical views or training from HF embeddings, prepare with
 `--without-images`. Photographs, query previews and gallery thumbnails require
 original images; embeddings cannot reconstruct them. Add images later and rerun
 preparation without that flag.
+
+## 6. Try your own task
+
+Main17's published task definitions are immutable. To define a different query
+or new attributes on Cars, HICO or CelebA, follow [New tasks](new_tasks.md).
+It specifies `task.json` and `labels.csv`, explains the fixed Val split, and
+provides commands to check inputs, train the eight probes, export the task and
+open it in the same Web interface. HF's pretrained probes cover the published
+attributes/tasks; arbitrary new attributes require your own supervision and training.

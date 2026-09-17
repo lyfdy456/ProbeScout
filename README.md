@@ -4,11 +4,18 @@ Visual analytics for attribute-guided image search with reusable attribute probe
 ProbeScout learns eight probes per attribute from frozen features, combines their
 evidence into a conjunction-aware ranking, and supports interactive refinement.
 
+**Image visualization requires the original dataset images.** Choose one of
+Cars, HICO-DET or CelebA and place it in the documented relative directory.
+Downloading HF embeddings skips **feature extraction**, not the image download.
+HF packages contain no original photographs or thumbnails.
+
 ## Start here
 
 - [Run one dataset locally](docs/manual_setup.md): manual image layout, task ZIPs,
   optional HF features, and the commands to open the Web interface.
 - [Workflow](docs/workflow.md): features, training/loading, fusion and feedback.
+- [Create a new task](docs/new_tasks.md): task JSON, supervision CSV, validation,
+  eight-probe training and local Web registration.
 - [Paper-to-code map](docs/paper_method.md): eight probes, Main17, Tables 2 and 5.
 - [Assets](docs/assets.md): required inputs, locations and checksums.
 - [Validation](docs/validation.md): checks performed on this release.
@@ -66,7 +73,8 @@ the matching features and pretrained banks too.
 
 | Goal | Entry point | Required assets |
 |---|---|---|
-| Explore saved rankings and give new feedback | Web interface: `npm run dev` | Web task bundles, initial fusion evidence and compatible Validation contracts; probes/features for probe updates |
+| Explore saved rankings and give new feedback | Web interface: `npm run dev` | Original images + task ZIP; HF features and pretrained probes additionally needed for probe updates |
+| Try a new query and new attributes | `scripts/custom_task.py` | Original images, ordered records, HF or locally extracted features, task JSON and binary supervision CSV |
 | Train probes from existing features | `scripts/train_probes.py` | Downloaded features, task metadata, original VQA labels and frozen Validation contracts |
 | Start from original images | Feature extraction, then probe training | Dataset images and ordered records, plus the training inputs above |
 | Reproduce paper tables without the interface | `scripts/evaluate_main17.py` and `scripts/evaluate_ablation.py` | Frozen evaluation evidence; CLAY cache for Table 2 |
@@ -76,6 +84,20 @@ supports a combined development launcher or separate frontend/API processes;
 see [launch options](visual_analytics/pcp_analyze/web/README.md#launch-options).
 Original images are required for photograph previews. HF embeddings can replace
 feature extraction, and `prepare_web.py --without-images` enables numerical use.
+That numerical-only option does not provide the complete image visualization workflow.
+
+For a new task on one of the three datasets, use the [input template](examples/custom_task)
+and follow [the new-task guide](docs/new_tasks.md). After filling in your query
+images and labels:
+
+```sh
+uv run --project probe_learning python scripts/custom_task.py --task artifacts/my_task/task.json --check
+uv run --project probe_learning python scripts/custom_task.py --task artifacts/my_task/task.json --execute
+```
+
+The second command trains and exports the task, then adds it to your local Web
+catalog. Restart `npm run dev` to select it. This creates local results; it does
+not upload your labels or change the paper's Main17 definitions.
 
 ## Layout
 

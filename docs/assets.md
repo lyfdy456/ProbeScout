@@ -5,6 +5,11 @@ source only. Follow [manual_setup.md](manual_setup.md) to install one dataset an
 launch the Web interface; [asset_distribution.md](asset_distribution.md) lists
 download links, pinned revisions and optional feature/model subsets.
 
+**Complete image visualization always requires original dataset images.** HF
+features replace feature extraction, but contain neither images nor thumbnails.
+For a new task, supply [task JSON and supervision CSV](new_tasks.md) in addition
+to the selected dataset's images, ordered records and features.
+
 ## Features and task metadata
 
 ```text

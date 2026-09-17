@@ -493,6 +493,7 @@ def binary_file_spec(
 
 def resolve_visual_embedding_source(
     task: TaskSpec,
+    adapter=None,
 ) -> tuple[Path, tuple[str, ...]]:
     """Resolve the same SigLIP rows used by the private tuning service."""
 
@@ -502,7 +503,7 @@ def resolve_visual_embedding_source(
             sys.path.insert(0, str(path))
     from src.data.dataset_adapter import build_adapter
 
-    adapter = build_adapter(task.dataset, task.task_name)
+    adapter = adapter if adapter is not None else build_adapter(task.dataset, task.task_name)
     records = adapter.records
     try:
         embedding_indices = np.asarray(records["embedding_index"], dtype=np.int64)
@@ -524,7 +525,7 @@ def resolve_visual_embedding_source(
     return embedding_path, tuple(str(value) for value in source_ids[order])
 
 
-def export_visual_embedding_bundle(task: TaskSpec) -> dict[str, Any]:
+def export_visual_embedding_bundle(task: TaskSpec, *, adapter=None) -> dict[str, Any]:
     """Publish one complete, immutable visual-analysis bundle atomically.
 
     Projection/KMeans computation reuses the private cache, but the browser
@@ -563,7 +564,7 @@ def export_visual_embedding_bundle(task: TaskSpec) -> dict[str, Any]:
         raise RuntimeError(
             f"Visual export row contract failed for {task.task_id}"
         )
-    embedding_path, source_image_ids = resolve_visual_embedding_source(task)
+    embedding_path, source_image_ids = resolve_visual_embedding_source(task, adapter)
     if source_image_ids != image_ids:
         raise RuntimeError(
             f"SigLIP embedding row order does not match {task.task_id}"

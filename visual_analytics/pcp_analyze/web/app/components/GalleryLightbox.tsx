@@ -30,6 +30,7 @@ export interface GalleryLightboxProps {
   feedbackBusy?: boolean;
   feedbackStatus?: string;
   getOriginalVqaLabel?: (item: GalleryItem) => OriginalVqaLabel | null | undefined;
+  supervisionLabel?: string;
   getAttributeStrengths?: (item: GalleryItem) => readonly AttributeStrengthPoint[];
   attributeStrengthSourceLabel?: string;
   renderFeedback?: (item: GalleryItem) => ReactNode;
@@ -113,6 +114,7 @@ export function GalleryLightbox({
   feedbackBusy = false,
   feedbackStatus = "",
   getOriginalVqaLabel,
+  supervisionLabel = "VQA",
   getAttributeStrengths,
   attributeStrengthSourceLabel,
   renderFeedback,
@@ -230,11 +232,11 @@ export function GalleryLightbox({
                 className={`gallery-lightbox-vqa-badge gallery-original-vqa-${
                   originalVqaLabel === 1 ? "positive" : "negative"
                 }`}
-                aria-label={`Existing VQA supervision: ${
+                aria-label={`Existing ${supervisionLabel} supervision: ${
                   originalVqaLabel === 1 ? "positive" : "negative"
                 }`}
               >
-                VQA {originalVqaLabel === 1 ? "positive ✓" : "negative ✕"}
+                {supervisionLabel} {originalVqaLabel === 1 ? "positive ✓" : "negative ✕"}
               </span>
             )}
           </div>

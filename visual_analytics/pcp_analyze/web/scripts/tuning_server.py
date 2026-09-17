@@ -1166,9 +1166,11 @@ class TuningService:
         start_worker: bool = True,
         clean_validation_root: Path | None = None,
         vqa_validation_root: Path | None = None,
+        catalog_path: Path | None = None,
     ) -> None:
         self.web_root = web_root.resolve()
         self.public_root = (self.web_root / "public").resolve()
+        self.catalog_path = catalog_path or self.public_root / "data" / "catalog.json"
         self.runtime_root = resolve_runtime_root(self.web_root, runtime_root)
         self.runtime_root.mkdir(parents=True, exist_ok=True)
         self.database_path = self.runtime_root / "workbench.sqlite3"
@@ -1582,7 +1584,7 @@ class TuningService:
         )
 
     def _load_catalog(self) -> dict[str, TaskSpec]:
-        catalog_path = self.public_root / "data" / "catalog.json"
+        catalog_path = self.catalog_path
         if not catalog_path.is_file():
             raise FileNotFoundError(f"Task catalog is unavailable: {catalog_path}")
         catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
@@ -1698,6 +1700,9 @@ class TuningService:
     @lru_cache(maxsize=3)
     def _source_adapter(self, task_id: str) -> Any:
         """Load only the dataset metadata needed to resolve an original image."""
+        import local_tasks
+        if local_tasks.available(self, task_id):
+            return local_tasks.adapter(self, task_id)
         import portable_tasks
         if portable_tasks.available(self, task_id):
             return portable_tasks.adapter(self, task_id)
@@ -1717,6 +1722,13 @@ class TuningService:
         """Resolve task/target metadata without loading the learner score tensors."""
         task = self.task(task_id)
         adapter = self._source_adapter(task_id)
+        import local_tasks
+        if local_tasks.available(self, task_id):
+            attributes = tuple(adapter.attrs)
+            return TuningSourceContext(adapter=adapter,
+                task_config={"dataset": task.dataset_id, "task": task.task_name},
+                attributes=attributes, target_attributes=attributes + (None,),
+                probe_stage="local", suite_path=None, supervision_audit_path=None)
         experiment_root = self.web_root.parents[2]
         linear_root = experiment_root / "probe_learning"
         pcp_root = self.web_root.parent
@@ -1768,6 +1780,13 @@ class TuningService:
         """Resolve the frozen train pool without loading learner score tensors."""
 
         import numpy as np
+        import local_tasks
+        if local_tasks.available(self, task_id):
+            bundle = self.bundle(task_id)
+            val = set(self._vqa_validation_split(task_id, "joint").validation_indices)
+            return np.asarray([r for r in range(len(bundle.image_ids))
+                               if r not in val and r not in bundle.query_indices
+                               and not bundle.test_mask[r]], dtype=np.int64)
         import portable_tasks
         if portable_tasks.available(self, task_id):
             portable_tasks.validation_split(self, task_id, "joint")
@@ -1793,6 +1812,9 @@ class TuningService:
 
     def _original_development_supervision(self, task_id: str, target_id: str) -> Any:
         """Load the audited original labels plus their legacy DG-only view."""
+        import local_tasks
+        if local_tasks.available(self, task_id):
+            return local_tasks.original_supervision(self, task_id, target_id)
         import portable_tasks
         if portable_tasks.available(self, task_id):
             return portable_tasks.original_supervision(self, task_id, target_id)
@@ -1898,7 +1920,9 @@ class TuningService:
         import numpy as np
 
         task = self.task(task_id)
-        specification = task.manifest["files"]["groundTruth"]
+        specification = task.manifest["files"].get("groundTruth")
+        if specification is None:
+            raise ValueError("This local task has no independent ground truth or Frozen Test evaluation")
         path = self._bundle_file(task, specification["path"])
         truth = np.fromfile(path, dtype=np.uint8)
         expected = task.row_count * len(task.target_ids)
@@ -1951,7 +1975,7 @@ class TuningService:
             "rowIndices": [int(row) for row in split.validation_indices],
             "count": int(split.audit["validationCount"]),
             "protocol": split.audit["protocol"],
-            "labelSource": "original-vqa-supervision",
+            "labelSource": split.audit.get("evaluationLabelSource", "original-vqa-supervision"),
             "initialModelHoldoutIndependent": False,
             "referenceOnly": True,
         }
@@ -7883,6 +7907,7 @@ class TuningService:
             mode in WEIGHT_REFINEMENT_RUN_MODES
             and snapshot_algorithm_version == RUN_ALGORITHM_VERSIONS[mode]
             and evaluation_scope == "vqa-validation"
+            and task.manifest["files"].get("groundTruth") is not None
         ):
             # All training, calibration, checkpoint selection and final scoring
             # above have finished. Both Probe sources compare the same original

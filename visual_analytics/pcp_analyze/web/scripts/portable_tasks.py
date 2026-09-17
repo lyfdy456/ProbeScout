@@ -24,7 +24,8 @@ def available(service, task_id):
     dataset = getattr(service.task(task_id), "dataset_id", None)
     if dataset not in DIRECTORIES:
         return False
-    return (root(service) / "dataset/tasks" / dataset / "manifest.json").is_file()
+    path = root(service) / "dataset/tasks" / dataset / "manifest.json"
+    return path.is_file() and task_id in manifest(service, dataset)[0]["tasks"]
 
 
 def _read(service, path, expected):
